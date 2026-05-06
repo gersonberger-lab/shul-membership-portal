@@ -55,6 +55,7 @@ export default async function MemberStatementPage({
                   <th>Debit</th>
                   <th>Credit</th>
                   <th>Balance</th>
+                  <th>Action</th>
                 </tr>
               </thead>
 
@@ -72,6 +73,7 @@ export default async function MemberStatementPage({
                       <td>{debit > 0 ? `£${debit.toFixed(2)}` : ""}</td>
                       <td>{credit > 0 ? `£${credit.toFixed(2)}` : ""}</td>
                       <td className="balance">£{runningBalance.toFixed(2)}</td>
+                      <td><a className="button" href={`/ledger/${entry.id}/edit`}>Edit</a></td>
                     </tr>
                   );
                 })}
