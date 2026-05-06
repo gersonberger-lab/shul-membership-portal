@@ -34,60 +34,95 @@ export default async function MemberAccountPage({
   return (
     <>
       <section className="hero">
-        <h1>
-          {member?.english_first_name} {member?.english_surname}
-        </h1>
-        <p dir="rtl">
-          {member?.hebrew_first_name} {member?.hebrew_surname}
-        </p>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}>
+          <div>
+            <h1>
+              {member?.english_first_name} {member?.english_surname}
+            </h1>
 
-        <div style={{ marginTop: 20, display: "flex", gap: 12, flexWrap: "wrap" }}>
-          <a className="button" href={`/charges/new?member=${memberId}`}>Add Charge</a>
-          <a className="button" href={`/payments/new?member=${memberId}`}>Add Payment</a>
-          <a className="button" href={`/members/${memberId}/edit`}>Edit Member</a>
+            <p className="hebrew-title" dir="rtl">
+              {member?.hebrew_first_name} {member?.hebrew_surname}
+            </p>
+
+            <p>Member No. {member?.member_number}</p>
+          </div>
+
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-start" }}>
+            <a className="button secondary" href={`/members/${memberId}/edit`}>
+              Edit Member
+            </a>
+            <a className="button" href={`/charges/new?member=${memberId}`}>
+              Add Charge
+            </a>
+            <a className="button" href={`/payments/new?member=${memberId}`}>
+              Add Payment
+            </a>
+          </div>
         </div>
       </section>
 
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 2fr",
-          gap: 24,
-          marginBottom: 24,
-        }}
-      >
+      <section className="account-grid">
         <div className="card">
-          <h3 style={{ marginTop: 0 }}>Member Details</h3>
-          <p><strong>Member No:</strong> {member?.member_number}</p>
-          <p><strong>Email:</strong> {member?.email || "-"}</p>
-          <p><strong>Phone:</strong> {member?.phone || "-"}</p>
-          <p><strong>Status:</strong> {member?.status || "-"}</p>
-          <p><strong>Language:</strong> {member?.preferred_language || "-"}</p>
-          <p><strong>Address:</strong><br />{member?.address || "-"}</p>
-        </div>
+          <h3 className="section-title">Member Details</h3>
 
-        <div className="card">
-          <h3 style={{ marginTop: 0 }}>Account Summary</h3>
-          <p style={{ fontSize: 34, fontWeight: 800, margin: 0 }}>
-            £{balance.toFixed(2)}
-          </p>
-          <p style={{ color: "#64748b", marginTop: 8 }}>Outstanding Balance</p>
-
-          <div style={{ display: "flex", gap: 24, marginTop: 22, flexWrap: "wrap" }}>
+          <div className="detail-list">
             <div>
-              <strong>£{totalCharges.toFixed(2)}</strong>
-              <p style={{ margin: "4px 0", color: "#64748b" }}>Total Charges</p>
+              <span>Email</span>
+              <strong>{member?.email || "-"}</strong>
             </div>
             <div>
+              <span>Phone</span>
+              <strong>{member?.phone || "-"}</strong>
+            </div>
+            <div>
+              <span>Status</span>
+              <strong>{member?.status || "-"}</strong>
+            </div>
+            <div>
+              <span>Preferred Language</span>
+              <strong>{member?.preferred_language || "-"}</strong>
+            </div>
+            <div>
+              <span>Father’s Hebrew Name</span>
+              <strong dir="rtl">{member?.fathers_hebrew_first_name || "-"}</strong>
+            </div>
+            <div>
+              <span>Address</span>
+              <strong>{member?.address || "-"}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div className="card summary-card">
+          <h3 className="section-title">Account Summary</h3>
+
+          <div className="big-balance">£{balance.toFixed(2)}</div>
+          <p className="muted">Outstanding Balance</p>
+
+          <div className="summary-row">
+            <div>
+              <span>Total Charges</span>
+              <strong>£{totalCharges.toFixed(2)}</strong>
+            </div>
+            <div>
+              <span>Total Payments</span>
               <strong>£{totalPayments.toFixed(2)}</strong>
-              <p style={{ margin: "4px 0", color: "#64748b" }}>Total Payments</p>
+            </div>
+            <div>
+              <span>Entries</span>
+              <strong>{ledgerEntries?.length || 0}</strong>
             </div>
           </div>
         </div>
       </section>
 
       <section className="card">
-        <h3 style={{ marginTop: 0 }}>Statement</h3>
+        <div className="statement-header">
+          <div>
+            <h3 className="section-title">Statement</h3>
+            <p className="muted">Charges and payments posted to this account.</p>
+          </div>
+        </div>
 
         {!ledgerEntries?.length && <p>No ledger entries yet.</p>}
 
@@ -115,7 +150,7 @@ export default async function MemberAccountPage({
                     <td>{debit > 0 ? `£${debit.toFixed(2)}` : ""}</td>
                     <td>{credit > 0 ? `£${credit.toFixed(2)}` : ""}</td>
                     <td>
-                      <a className="button" href={`/ledger/${entry.id}/edit`}>
+                      <a className="button secondary" href={`/ledger/${entry.id}/edit`}>
                         Edit
                       </a>
                     </td>
