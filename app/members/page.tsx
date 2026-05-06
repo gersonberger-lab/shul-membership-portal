@@ -50,11 +50,6 @@ export default async function MembersPage() {
                 </td>
                 <td>{m.email}</td>
                 <td className="balance">£0.00</td>
-                <td>
-                  <a className="button" href={`/ledger/${entry.id}/edit`}>
-                    Edit
-                  </a>
-                </td>
               </tr>
             ))}
           </tbody>
