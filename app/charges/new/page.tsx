@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../../../lib/supabase";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type Member = {
   id: string;
@@ -35,6 +35,8 @@ function addDays(dateString: string, days: number) {
 
 export default function NewChargePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const presetMemberId = searchParams.get("member");
 
   const [members, setMembers] = useState<Member[]>([]);
   const [chargeItems, setChargeItems] = useState<ChargeItem[]>([]);
@@ -69,6 +71,20 @@ export default function NewChargePage() {
         .order("sort_order");
 
       setMembers(memberData || []);
+      if (presetMemberId && memberData) {
+        const presetMember = memberData.find((m) => m.id === presetMemberId);
+      
+        if (presetMember) {
+          setMemberSearch(
+            `M${presetMember.member_number} - ${presetMember.english_first_name} ${presetMember.english_surname}`
+          );
+      
+          setForm((prev) => ({
+            ...prev,
+            member_id: presetMember.id,
+          }));
+        }
+      }
       setChargeItems((categoryData as unknown as ChargeItem[]) || []);
     }
 
