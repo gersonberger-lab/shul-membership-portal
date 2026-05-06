@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../../../lib/supabase";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 type Member = {
   id: string;
@@ -35,8 +35,6 @@ function addDays(dateString: string, days: number) {
 
 export default function NewChargePage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const presetMemberId = searchParams.get("member");
 
   const [members, setMembers] = useState<Member[]>([]);
   const [chargeItems, setChargeItems] = useState<ChargeItem[]>([]);
@@ -45,6 +43,7 @@ export default function NewChargePage() {
   const [memberSearch, setMemberSearch] = useState("");
   const [chargeSearch, setChargeSearch] = useState("");
   const [activeSearch, setActiveSearch] = useState<"member" | "charge" | null>(null);
+  const [presetMemberId, setPresetMemberId] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     member_id: "",
@@ -56,6 +55,11 @@ export default function NewChargePage() {
     public_note: "",
     internal_note: "",
   });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setPresetMemberId(params.get("member"));
+  }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -71,25 +75,26 @@ export default function NewChargePage() {
         .order("sort_order");
 
       setMembers(memberData || []);
+      setChargeItems((categoryData as unknown as ChargeItem[]) || []);
+
       if (presetMemberId && memberData) {
         const presetMember = memberData.find((m) => m.id === presetMemberId);
-      
+
         if (presetMember) {
           setMemberSearch(
             `M${presetMember.member_number} - ${presetMember.english_first_name} ${presetMember.english_surname}`
           );
-      
+
           setForm((prev) => ({
             ...prev,
             member_id: presetMember.id,
           }));
         }
       }
-      setChargeItems((categoryData as unknown as ChargeItem[]) || []);
     }
 
     loadData();
-  }, []);
+  }, [presetMemberId]);
 
   const filteredMembers = useMemo(() => {
     const q = memberSearch.trim().toLowerCase();
