@@ -1,74 +1,95 @@
-.form-card {
-  max-width: 850px;
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #eef2f7;
+  color: #162033;
 }
 
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-}
+a { text-decoration: none; color: inherit; }
 
-.form-field {
+.app-shell {
   display: flex;
-  flex-direction: column;
-  gap: 7px;
+  min-height: 100vh;
 }
 
-.form-field label {
-  font-size: 13px;
-  font-weight: 700;
-  color: #475569;
+.sidebar {
+  width: 260px;
+  background: #111827;
+  color: white;
+  padding: 28px 20px;
 }
 
-.form-field input,
-.form-field select,
-.form-field textarea {
-  width: 100%;
-  border: 1px solid #dbe3ef;
-  background: #f8fafc;
-  padding: 13px 15px;
-  border-radius: 14px;
-  font-size: 15px;
-  outline: none;
+.logo {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 36px;
 }
 
-.form-field input:focus,
-.form-field select:focus,
-.form-field textarea:focus {
-  border-color: #f59e0b;
+.nav a {
+  display: block;
+  padding: 13px 14px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  color: #d1d5db;
+}
+
+.nav a:hover {
+  background: #1f2937;
+  color: white;
+}
+
+.main-area {
+  flex: 1;
+  padding: 34px;
+}
+
+.hero {
+  background: linear-gradient(135deg, #243b55, #141e30);
+  color: white;
+  padding: 30px;
+  border-radius: 26px;
+  margin-bottom: 26px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.card {
   background: white;
-  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15);
+  border-radius: 20px;
+  padding: 24px;
+  margin-top: 20px;
 }
 
-.form-field.full {
-  grid-column: 1 / -1;
+.button {
+  display: inline-block;
+  background: #f59e0b;
+  color: #111827;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-weight: 700;
 }
 
-@media (max-width: 800px) {
-  .app-shell {
-    display: block;
-  }
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
 
-  .sidebar {
-    width: 100%;
-    border-radius: 0;
-  }
+.table th {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
 
-  .main-area {
-    padding: 18px;
-  }
+.table td {
+  padding: 12px;
+}
 
-  .stats {
-    grid-template-columns: 1fr;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
+.balance {
+  font-weight: bold;
+  color: #b45309;
 }
