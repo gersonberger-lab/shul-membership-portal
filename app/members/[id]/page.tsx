@@ -42,8 +42,8 @@ export default async function MemberAccountPage({
         </p>
 
         <div style={{ marginTop: 20, display: "flex", gap: 12, flexWrap: "wrap" }}>
-          <a className="button" href="/charges/new">Add Charge</a>
-          <a className="button" href="/payments/new">Add Payment</a>
+          <a className="button" href={`/charges/new?member=${memberId}`}>Add Charge</a>
+          <a className="button" href={`/payments/new?member=${memberId}`}>Add Payment</a>
           <a className="button" href={`/members/${memberId}/edit`}>Edit Member</a>
         </div>
       </section>
