@@ -1,90 +1,91 @@
-const members = [
-  {
-    id: 1,
-    memberId: "M001",
-    englishName: "Moshe Cohen",
-    hebrewName: "משה כהן",
-    phone: "07700 900001",
-    email: "moshe@example.com",
-    membershipType: "Full",
-    balance: 350,
-    status: "Active",
-  },
-  {
-    id: 2,
-    memberId: "M002",
-    englishName: "Yaakov Levy",
-    hebrewName: "יעקב לוי",
-    phone: "07700 900002",
-    email: "yaakov@example.com",
-    membershipType: "Family",
-    balance: 120,
-    status: "Active",
-  },
-];
-
-export default function MembersPage() {
+export default function NewMemberPage() {
   return (
     <>
       <section className="hero">
-        <h1>Members</h1>
-        <p>Manage members, balances, contact details and portal access.</p>
-
-        <div className="actions">
-          <a className="button" href="/members/new">Add Member</a>
-          <a className="button secondary" href="/charges/new">Add Charge</a>
-        </div>
+        <h1>Add Member</h1>
+        <p>Create a member record with English and Hebrew details.</p>
       </section>
 
-      <section className="stats">
-        <div className="stat-card">
-          <div className="stat-label">Active Members</div>
-          <div className="stat-value">2</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Total Outstanding</div>
-          <div className="stat-value">£470</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Portal Users</div>
-          <div className="stat-value">0</div>
-        </div>
-      </section>
+      <section className="card form-card">
+        <form className="form-grid">
+          <div className="form-field">
+            <label>English first name</label>
+            <input placeholder="e.g. Moshe" />
+          </div>
 
-      <section className="card">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Member ID</th>
-              <th>Name</th>
-              <th>Hebrew Name</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Type</th>
-              <th>Balance</th>
-              <th>Status</th>
-            </tr>
-          </thead>
+          <div className="form-field">
+            <label>English surname</label>
+            <input placeholder="e.g. Cohen" />
+          </div>
 
-          <tbody>
-            {members.map((m) => (
-              <tr key={m.id}>
-                <td>{m.memberId}</td>
-                <td>
-                  <a href={`/members/${m.id}`}>
-                    <strong>{m.englishName}</strong>
-                  </a>
-                </td>
-                <td className="hebrew" dir="rtl">{m.hebrewName}</td>
-                <td>{m.phone}</td>
-                <td>{m.email}</td>
-                <td>{m.membershipType}</td>
-                <td className="balance">£{m.balance.toFixed(2)}</td>
-                <td><span className="badge">{m.status}</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          <div className="form-field">
+            <label>Hebrew first name</label>
+            <input placeholder="למשל משה" dir="rtl" lang="he" />
+          </div>
+
+          <div className="form-field">
+            <label>Hebrew surname</label>
+            <input placeholder="למשל כהן" dir="rtl" lang="he" />
+          </div>
+
+          <div className="form-field">
+            <label>Father’s Hebrew first name</label>
+            <input placeholder="למשל אברהם" dir="rtl" lang="he" />
+          </div>
+
+          <div className="form-field">
+            <label>Phone</label>
+            <input placeholder="07700 900000" inputMode="tel" />
+          </div>
+
+          <div className="form-field">
+            <label>Email</label>
+            <input placeholder="member@example.com" type="email" />
+          </div>
+
+          <div className="form-field">
+            <label>Membership type</label>
+            <select defaultValue="">
+              <option value="" disabled>Select membership type</option>
+              <option>Full</option>
+              <option>Family</option>
+              <option>Pensioner</option>
+            </select>
+          </div>
+
+          <div className="form-field">
+            <label>Preferred language</label>
+            <select defaultValue="">
+              <option value="" disabled>Select language</option>
+              <option>English</option>
+              <option>Hebrew</option>
+            </select>
+          </div>
+
+          <div className="form-field">
+            <label>Status</label>
+            <select defaultValue="Active">
+              <option>Active</option>
+              <option>Inactive</option>
+              <option>Resigned</option>
+              <option>Deceased</option>
+            </select>
+          </div>
+
+          <div className="form-field full">
+            <label>Address</label>
+            <textarea placeholder="Full address" rows={3} />
+          </div>
+
+          <div className="form-field full">
+            <label>Notes</label>
+            <textarea placeholder="Internal notes" rows={4} />
+          </div>
+
+          <div className="form-field full">
+            <button type="submit">Save Member</button>
+          </div>
+        </form>
       </section>
     </>
   );
