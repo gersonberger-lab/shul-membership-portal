@@ -34,6 +34,7 @@ export default async function MembersPage() {
               <th>Hebrew</th>
               <th>Email</th>
               <th>Balance</th>
+              <th>Actions</th>
             </tr>
           </thead>
 
@@ -49,6 +50,11 @@ export default async function MembersPage() {
                 </td>
                 <td>{m.email}</td>
                 <td className="balance">£0.00</td>
+                <td>
+                  <a className="button" href={`/ledger/${entry.id}/edit`}>
+                    Edit
+                  </a>
+                </td>
               </tr>
             ))}
           </tbody>
