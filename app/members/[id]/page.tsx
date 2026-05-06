@@ -1,21 +1,22 @@
 import { supabase } from "../../../lib/supabase";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function MemberStatementPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const memberId = params.id;
+  const { id: memberId } = await params;
 
-  const { data: member } = await supabase
+  const { data: member, error: memberError } = await supabase
     .from("members")
     .select("*")
     .eq("id", memberId)
     .single();
 
-  const { data: ledgerEntries } = await supabase
+  const { data: ledgerEntries, error: ledgerError } = await supabase
     .from("ledger_entries")
     .select("*")
     .eq("member_id", memberId)
@@ -33,40 +34,55 @@ export default async function MemberStatementPage({
         <p dir="rtl">
           {member?.hebrew_first_name} {member?.hebrew_surname}
         </p>
+        <p>Member ID: {memberId}</p>
       </section>
 
       <section className="card">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Debit</th>
-              <th>Credit</th>
-              <th>Balance</th>
-            </tr>
-          </thead>
+        {memberError && <pre>{JSON.stringify(memberError, null, 2)}</pre>}
+        {ledgerError && <pre>{JSON.stringify(ledgerError, null, 2)}</pre>}
 
-          <tbody>
-            {ledgerEntries?.map((entry) => {
-              runningBalance += Number(entry.debit_amount) - Number(entry.credit_amount);
+        {!ledgerEntries?.length && (
+          <p>No ledger entries found for this member yet.</p>
+        )}
 
-              return (
-                <tr key={entry.id}>
-                  <td>{entry.entry_date}</td>
-                  <td>{entry.description}</td>
-                  <td>{entry.debit_amount ? `£${Number(entry.debit_amount).toFixed(2)}` : ""}</td>
-                  <td>{entry.credit_amount ? `£${Number(entry.credit_amount).toFixed(2)}` : ""}</td>
-                  <td className="balance">£{runningBalance.toFixed(2)}</td>
+        {!!ledgerEntries?.length && (
+          <>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Debit</th>
+                  <th>Credit</th>
+                  <th>Balance</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              </thead>
 
-        <div style={{ marginTop: 24, fontSize: 22, fontWeight: 800 }}>
-          Outstanding Balance: £{runningBalance.toFixed(2)}
-        </div>
+              <tbody>
+                {ledgerEntries.map((entry) => {
+                  const debit = Number(entry.debit_amount || 0);
+                  const credit = Number(entry.credit_amount || 0);
+
+                  runningBalance += debit - credit;
+
+                  return (
+                    <tr key={entry.id}>
+                      <td>{entry.entry_date}</td>
+                      <td>{entry.description}</td>
+                      <td>{debit > 0 ? £${debit.toFixed(2)} : ""}</td>
+                      <td>{credit > 0 ? £${credit.toFixed(2)} : ""}</td>
+                      <td className="balance">£{runningBalance.toFixed(2)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            <div style={{ marginTop: 24, fontSize: 22, fontWeight: 800 }}>
+              Outstanding Balance: £{runningBalance.toFixed(2)}
+            </div>
+          </>
+        )}
       </section>
     </>
   );
