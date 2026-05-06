@@ -12,11 +12,11 @@
 
   --nav-1: #081225;
   --nav-2: #0d1b38;
-  --nav-hover: #1d4ed8;
-  --nav-active: linear-gradient(135deg, #4f46e5, #2563eb);
-
-  --primary-1: #4f46e5;
-  --primary-2: #2563eb;
+  --nav-hover: #b08d57;
+  --nav-active: linear-gradient(135deg, #c7a56a, #a88445);
+  
+  --primary-1: #c7a56a;
+  --primary-2: #a88445;
   --success: #10b981;
   --danger: #ef4444;
 
@@ -232,7 +232,7 @@ button:disabled {
 .form-field textarea:focus {
   border-color: #94a3b8;
   background: white;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 0 0 4px rgba(199, 165, 106, 0.14);
 }
 
 .form-field textarea {
