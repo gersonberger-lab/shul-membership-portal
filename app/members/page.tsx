@@ -1,91 +1,58 @@
-export default function NewMemberPage() {
+import { supabase } from "../../lib/supabase";
+
+export const dynamic = "force-dynamic";
+
+export default async function MembersPage() {
+  const { data: members, error } = await supabase
+    .from("members")
+    .select("*")
+    .order("created_at", { ascending: false });
+
   return (
     <>
       <section className="hero">
-        <h1>Add Member</h1>
-        <p>Create a member record with English and Hebrew details.</p>
+        <h1>Members</h1>
+        <p>Live data from database</p>
+
+        <div style={{ marginTop: 20 }}>
+          <a className="button" href="/members/new">Add Member</a>
+        </div>
       </section>
 
-      <section className="card form-card">
-        <form className="form-grid">
-          <div className="form-field">
-            <label>English first name</label>
-            <input placeholder="e.g. Moshe" />
-          </div>
+      <section className="card">
+        {error && (
+          <pre style={{ color: "red" }}>
+            {JSON.stringify(error, null, 2)}
+          </pre>
+        )}
 
-          <div className="form-field">
-            <label>English surname</label>
-            <input placeholder="e.g. Cohen" />
-          </div>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Hebrew</th>
+              <th>Email</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
 
-          <div className="form-field">
-            <label>Hebrew first name</label>
-            <input placeholder="למשל משה" dir="rtl" lang="he" />
-          </div>
-
-          <div className="form-field">
-            <label>Hebrew surname</label>
-            <input placeholder="למשל כהן" dir="rtl" lang="he" />
-          </div>
-
-          <div className="form-field">
-            <label>Father’s Hebrew first name</label>
-            <input placeholder="למשל אברהם" dir="rtl" lang="he" />
-          </div>
-
-          <div className="form-field">
-            <label>Phone</label>
-            <input placeholder="07700 900000" inputMode="tel" />
-          </div>
-
-          <div className="form-field">
-            <label>Email</label>
-            <input placeholder="member@example.com" type="email" />
-          </div>
-
-          <div className="form-field">
-            <label>Membership type</label>
-            <select defaultValue="">
-              <option value="" disabled>Select membership type</option>
-              <option>Full</option>
-              <option>Family</option>
-              <option>Pensioner</option>
-            </select>
-          </div>
-
-          <div className="form-field">
-            <label>Preferred language</label>
-            <select defaultValue="">
-              <option value="" disabled>Select language</option>
-              <option>English</option>
-              <option>Hebrew</option>
-            </select>
-          </div>
-
-          <div className="form-field">
-            <label>Status</label>
-            <select defaultValue="Active">
-              <option>Active</option>
-              <option>Inactive</option>
-              <option>Resigned</option>
-              <option>Deceased</option>
-            </select>
-          </div>
-
-          <div className="form-field full">
-            <label>Address</label>
-            <textarea placeholder="Full address" rows={3} />
-          </div>
-
-          <div className="form-field full">
-            <label>Notes</label>
-            <textarea placeholder="Internal notes" rows={4} />
-          </div>
-
-          <div className="form-field full">
-            <button type="submit">Save Member</button>
-          </div>
-        </form>
+          <tbody>
+            {members?.map((m) => (
+              <tr key={m.id}>
+                <td>{m.member_number}</td>
+                <td>
+                  {m.english_first_name} {m.english_surname}
+                </td>
+                <td dir="rtl">
+                  {m.hebrew_first_name} {m.hebrew_surname}
+                </td>
+                <td>{m.email}</td>
+                <td className="balance">£0.00</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </section>
     </>
   );
