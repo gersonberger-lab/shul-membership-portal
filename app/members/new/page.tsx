@@ -1,85 +1,78 @@
+"use client";
+
+import { useState } from "react";
+import { supabase } from "../../../lib/supabase";
+import { useRouter } from "next/navigation";
+
 export default function NewMemberPage() {
+  const router = useRouter();
+
+  const [form, setForm] = useState({
+    english_first_name: "",
+    english_surname: "",
+    hebrew_first_name: "",
+    hebrew_surname: "",
+    fathers_hebrew_first_name: "",
+    email: "",
+  });
+
+  const handleChange = (e: any) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+
+    const { error } = await supabase.from("members").insert([
+      {
+        ...form,
+        status: "active",
+      },
+    ]);
+
+    if (error) {
+      alert("Error: " + error.message);
+    } else {
+      router.push("/members");
+    }
+  };
+
   return (
     <>
       <section className="hero">
         <h1>Add Member</h1>
-        <p>Create a member record with English and Hebrew details.</p>
       </section>
 
       <section className="card form-card">
-        <form className="form-grid">
+        <form className="form-grid" onSubmit={handleSubmit}>
           <div className="form-field">
             <label>English first name</label>
-            <input placeholder="e.g. Moshe" />
+            <input name="english_first_name" onChange={handleChange} />
           </div>
 
           <div className="form-field">
             <label>English surname</label>
-            <input placeholder="e.g. Cohen" />
+            <input name="english_surname" onChange={handleChange} />
           </div>
 
           <div className="form-field">
             <label>Hebrew first name</label>
-            <input placeholder="למשל משה" dir="rtl" lang="he" />
+            <input name="hebrew_first_name" dir="rtl" onChange={handleChange} />
           </div>
 
           <div className="form-field">
             <label>Hebrew surname</label>
-            <input placeholder="למשל כהן" dir="rtl" lang="he" />
+            <input name="hebrew_surname" dir="rtl" onChange={handleChange} />
           </div>
 
           <div className="form-field">
-            <label>Father’s Hebrew first name</label>
-            <input placeholder="למשל אברהם" dir="rtl" lang="he" />
-          </div>
-
-          <div className="form-field">
-            <label>Phone</label>
-            <input placeholder="07700 900000" inputMode="tel" />
+            <label>Father’s Hebrew name</label>
+            <input name="fathers_hebrew_first_name" dir="rtl" onChange={handleChange} />
           </div>
 
           <div className="form-field">
             <label>Email</label>
-            <input placeholder="member@example.com" type="email" />
-          </div>
-
-          <div className="form-field">
-            <label>Membership type</label>
-            <select defaultValue="">
-              <option value="" disabled>Select membership type</option>
-              <option>Full</option>
-              <option>Family</option>
-              <option>Pensioner</option>
-            </select>
-          </div>
-
-          <div className="form-field">
-            <label>Preferred language</label>
-            <select defaultValue="">
-              <option value="" disabled>Select language</option>
-              <option>English</option>
-              <option>Hebrew</option>
-            </select>
-          </div>
-
-          <div className="form-field">
-            <label>Status</label>
-            <select defaultValue="Active">
-              <option>Active</option>
-              <option>Inactive</option>
-              <option>Resigned</option>
-              <option>Deceased</option>
-            </select>
-          </div>
-
-          <div className="form-field full">
-            <label>Address</label>
-            <textarea placeholder="Full address" rows={3} />
-          </div>
-
-          <div className="form-field full">
-            <label>Notes</label>
-            <textarea placeholder="Internal notes" rows={4} />
+            <input name="email" type="email" onChange={handleChange} />
           </div>
 
           <div className="form-field full">
