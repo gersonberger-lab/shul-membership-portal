@@ -2,15 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../../../lib/supabase";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
-export default function EditLedgerEntryPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function EditLedgerEntryPage() {
   const router = useRouter();
-  const entryId = params.id;
+  const params = useParams();
+  const entryId = params.id as string;
 
   const [saving, setSaving] = useState(false);
   const [memberId, setMemberId] = useState("");
@@ -34,11 +31,12 @@ export default function EditLedgerEntryPage({
         .single();
 
       if (error) {
-        alert(error.message);
+        alert("Error loading entry: " + error.message);
         return;
       }
 
       setMemberId(data.member_id);
+
       setForm({
         entry_date: data.entry_date || "",
         description: data.description || "",
@@ -50,7 +48,7 @@ export default function EditLedgerEntryPage({
       });
     }
 
-    loadEntry();
+    if (entryId) loadEntry();
   }, [entryId]);
 
   const handleChange = (e: any) => {
@@ -84,14 +82,14 @@ export default function EditLedgerEntryPage({
     setSaving(false);
 
     if (error) {
-      alert("Error: " + error.message);
+      alert("Error saving: " + error.message);
     } else {
       router.push(`/members/${memberId}`);
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this ledger entry?")) return;
+    if (!confirm("Are you sure you want to delete this entry?")) return;
 
     const { error } = await supabase
       .from("ledger_entries")
@@ -99,7 +97,7 @@ export default function EditLedgerEntryPage({
       .eq("id", entryId);
 
     if (error) {
-      alert("Error: " + error.message);
+      alert("Error deleting: " + error.message);
     } else {
       router.push(`/members/${memberId}`);
     }
@@ -109,99 +107,52 @@ export default function EditLedgerEntryPage({
     <>
       <section className="hero">
         <h1>Edit Ledger Entry</h1>
-        <p>Update or delete a charge/payment line.</p>
+        <p>Edit or delete this charge/payment line.</p>
       </section>
 
       <section className="card form-card">
         <form className="form-grid" onSubmit={handleSave}>
           <div className="form-field">
             <label>Date *</label>
-            <input
-              name="entry_date"
-              type="date"
-              value={form.entry_date}
-              onChange={handleChange}
-              required
-            />
+            <input name="entry_date" type="date" value={form.entry_date} onChange={handleChange} required />
           </div>
 
           <div className="form-field">
             <label>Due date</label>
-            <input
-              name="due_date"
-              type="date"
-              value={form.due_date}
-              onChange={handleChange}
-            />
+            <input name="due_date" type="date" value={form.due_date} onChange={handleChange} />
           </div>
 
           <div className="form-field full">
             <label>Description *</label>
-            <input
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              required
-            />
+            <input name="description" value={form.description} onChange={handleChange} required />
           </div>
 
           <div className="form-field">
-            <label>Debit / Charge</label>
-            <input
-              name="debit_amount"
-              type="number"
-              step="0.01"
-              min="0"
-              value={form.debit_amount}
-              onChange={handleChange}
-            />
+            <label>Charge / Debit</label>
+            <input name="debit_amount" type="number" step="0.01" min="0" value={form.debit_amount} onChange={handleChange} />
           </div>
 
           <div className="form-field">
-            <label>Credit / Payment</label>
-            <input
-              name="credit_amount"
-              type="number"
-              step="0.01"
-              min="0"
-              value={form.credit_amount}
-              onChange={handleChange}
-            />
+            <label>Payment / Credit</label>
+            <input name="credit_amount" type="number" step="0.01" min="0" value={form.credit_amount} onChange={handleChange} />
           </div>
 
           <div className="form-field full">
             <label>Public note</label>
-            <textarea
-              name="public_note"
-              rows={3}
-              value={form.public_note}
-              onChange={handleChange}
-            />
+            <textarea name="public_note" rows={3} value={form.public_note} onChange={handleChange} />
           </div>
 
           <div className="form-field full">
             <label>Internal note</label>
-            <textarea
-              name="internal_note"
-              rows={3}
-              value={form.internal_note}
-              onChange={handleChange}
-            />
+            <textarea name="internal_note" rows={3} value={form.internal_note} onChange={handleChange} />
           </div>
 
-          <div className="form-field full" style={{ display: "flex", gap: 12 }}>
+          <div className="form-field full" style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <button type="submit" disabled={saving}>
               {saving ? "Saving..." : "Save Changes"}
             </button>
 
-            <button
-              type="button"
-              onClick={handleDelete}
-              style={{
-                background: "#fee2e2",
-                color: "#991b1b",
-              }}
-            >
+            <button type="button" onClick={handleDelete} style={{ background: "#fee2e2", color: "#991b1b" }}>
               Delete Entry
             </button>
           </div>
