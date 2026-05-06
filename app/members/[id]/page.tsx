@@ -1,70 +1,73 @@
-const ledgerEntries = [
-  {
-    id: 1,
-    date: "01/01/2026",
-    description: "Membership - Annual",
-    debit: 500,
-    credit: 0,
-  },
-  {
-    id: 2,
-    date: "05/01/2026",
-    description: "Bank transfer payment",
-    debit: 0,
-    credit: 200,
-  },
-  {
-    id: 3,
-    date: "10/01/2026",
-    description: "Aliyos - Shlishi",
-    debit: 50,
-    credit: 0,
-  },
-];
+import { supabase } from "../../../lib/supabase";
 
-export default function MemberStatementPage() {
+export const dynamic = "force-dynamic";
+
+export default async function MemberStatementPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const memberId = params.id;
+
+  const { data: member } = await supabase
+    .from("members")
+    .select("*")
+    .eq("id", memberId)
+    .single();
+
+  const { data: ledgerEntries } = await supabase
+    .from("ledger_entries")
+    .select("*")
+    .eq("member_id", memberId)
+    .order("entry_date", { ascending: true })
+    .order("created_at", { ascending: true });
+
   let runningBalance = 0;
 
   return (
-    <main style={{ padding: "40px", fontFamily: "Arial, sans-serif" }}>
-      <h1>Member Statement</h1>
-
-      <section style={{ marginBottom: "30px" }}>
-        <h2>Moshe Cohen</h2>
-        <p dir="rtl">משה כהן</p>
-        <p>Member ID: M001</p>
+    <>
+      <section className="hero">
+        <h1>
+          {member?.english_first_name} {member?.english_surname}
+        </h1>
+        <p dir="rtl">
+          {member?.hebrew_first_name} {member?.hebrew_surname}
+        </p>
       </section>
 
-      <table border={1} cellPadding={10} cellSpacing={0}>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Debit</th>
-            <th>Credit</th>
-            <th>Balance</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ledgerEntries.map((entry) => {
-            runningBalance += entry.debit - entry.credit;
+      <section className="card">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Debit</th>
+              <th>Credit</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
 
-            return (
-              <tr key={entry.id}>
-                <td>{entry.date}</td>
-                <td>{entry.description}</td>
-                <td>{entry.debit ? `£${entry.debit.toFixed(2)}` : ""}</td>
-                <td>{entry.credit ? `£${entry.credit.toFixed(2)}` : ""}</td>
-                <td>£{runningBalance.toFixed(2)}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+          <tbody>
+            {ledgerEntries?.map((entry) => {
+              runningBalance += Number(entry.debit_amount) - Number(entry.credit_amount);
 
-      <h2 style={{ marginTop: "30px" }}>
-        Outstanding Balance: £{runningBalance.toFixed(2)}
-      </h2>
-    </main>
+              return (
+                <tr key={entry.id}>
+                  <td>{entry.entry_date}</td>
+                  <td>{entry.description}</td>
+                  <td>{entry.debit_amount ? `£${Number(entry.debit_amount).toFixed(2)}` : ""}</td>
+                  <td>{entry.credit_amount ? `£${Number(entry.credit_amount).toFixed(2)}` : ""}</td>
+                  <td className="balance">£{runningBalance.toFixed(2)}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
+        <div style={{ marginTop: 24, fontSize: 22, fontWeight: 800 }}>
+          Outstanding Balance: £{runningBalance.toFixed(2)}
+        </div>
+      </section>
+    </>
   );
 }
