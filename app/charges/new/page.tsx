@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 import { useRouter } from "next/navigation";
 
@@ -15,12 +15,13 @@ type ChargeItem = {
   id: string;
   name_en: string;
   name_he: string | null;
+  search_terms: string | null;
   default_amount: number | null;
   due_days: number;
   charge_category_groups: {
     name_en: string;
     name_he: string | null;
-  } | null;
+  }[] | null;
 };
 
 function addDays(dateString: string, days: number) {
@@ -36,6 +37,7 @@ export default function NewChargePage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [chargeItems, setChargeItems] = useState<ChargeItem[]>([]);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
 
   const [form, setForm] = useState({
     member_id: "",
@@ -56,7 +58,7 @@ export default function NewChargePage() {
 
       const { data: categoryData } = await supabase
         .from("charge_categories")
-        .select("id, name_en, name_he, default_amount, due_days, charge_category_groups(name_en, name_he)")
+        .select("id, name_en, name_he, search_terms, default_amount, due_days, charge_category_groups(name_en, name_he)")
         .eq("active", true)
         .order("sort_order");
 
@@ -67,27 +69,33 @@ export default function NewChargePage() {
     loadData();
   }, []);
 
+  const filteredChargeItems = useMemo(() => {
+    if (!search.trim()) return chargeItems.slice(0, 8);
+
+    const q = search.toLowerCase();
+
+    return chargeItems
+      .filter((item) => {
+        const group = item.charge_category_groups?.[0]?.name_en || "";
+        return (
+          item.name_en.toLowerCase().includes(q) ||
+          group.toLowerCase().includes(q) ||
+          (item.search_terms || "").toLowerCase().includes(q)
+        );
+      })
+      .slice(0, 8);
+  }, [search, chargeItems]);
+
   const selectedCharge = chargeItems.find(
     (item) => item.id === form.charge_category_id
   );
 
   const description = selectedCharge
-    ? `${selectedCharge.charge_category_groups?.name_en || ""} - ${selectedCharge.name_en}`
+    ? `${selectedCharge.charge_category_groups?.[0]?.name_en || ""} - ${selectedCharge.name_en}`
     : "";
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
-
-    if (name === "charge_category_id") {
-      const item = chargeItems.find((c) => c.id === value);
-      setForm({
-        ...form,
-        charge_category_id: value,
-        debit_amount: item?.default_amount ? String(item.default_amount) : "",
-        due_date: addDays(form.entry_date, item?.due_days || 0),
-      });
-      return;
-    }
 
     if (name === "entry_date") {
       setForm({
@@ -99,6 +107,16 @@ export default function NewChargePage() {
     }
 
     setForm({ ...form, [name]: value });
+  };
+
+  const selectCharge = (item: ChargeItem) => {
+    setSearch(`${item.charge_category_groups?.[0]?.name_en || ""} - ${item.name_en}`);
+    setForm({
+      ...form,
+      charge_category_id: item.id,
+      debit_amount: item.default_amount ? String(item.default_amount) : "",
+      due_date: addDays(form.entry_date, item.due_days || 0),
+    });
   };
 
   const handleSubmit = async (e: any) => {
@@ -140,7 +158,7 @@ export default function NewChargePage() {
     <>
       <section className="hero">
         <h1>Add Charge</h1>
-        <p>Post a charge to a member statement using your charge categories.</p>
+        <p>Post a charge using searchable charge items.</p>
       </section>
 
       <section className="card form-card">
@@ -157,22 +175,53 @@ export default function NewChargePage() {
             </select>
           </div>
 
-          <div className="form-field full">
+          <div className="form-field full" style={{ position: "relative" }}>
             <label>Charge item *</label>
-            <select
-              name="charge_category_id"
-              value={form.charge_category_id}
-              onChange={handleChange}
+            <input
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setForm({ ...form, charge_category_id: "" });
+              }}
+              placeholder="Type e.g. shli, chamishi, membership..."
               required
-            >
-              <option value="">Search/select charge item</option>
-              {chargeItems.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.charge_category_groups?.name_en} - {item.name_en}
-                  {item.default_amount ? ` | £${item.default_amount}` : ""}
-                </option>
-              ))}
-            </select>
+            />
+
+            {!form.charge_category_id && (
+              <div style={{
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                right: 0,
+                background: "white",
+                border: "1px solid #ddd",
+                borderRadius: 12,
+                marginTop: 6,
+                zIndex: 20,
+                overflow: "hidden"
+              }}>
+                {filteredChargeItems.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => selectCharge(item)}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "12px 14px",
+                      background: "white",
+                      border: "none",
+                      borderBottom: "1px solid #eee",
+                      color: "#111"
+                    }}
+                  >
+                    {item.charge_category_groups?.[0]?.name_en} - {item.name_en}
+                    {item.default_amount ? ` | £${item.default_amount}` : ""}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="form-field">
