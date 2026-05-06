@@ -9,6 +9,8 @@ type Member = {
   member_number: number;
   english_first_name: string;
   english_surname: string;
+  hebrew_first_name: string | null;
+  hebrew_surname: string | null;
 };
 
 type ChargeItem = {
@@ -37,14 +39,18 @@ export default function NewChargePage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [chargeItems, setChargeItems] = useState<ChargeItem[]>([]);
   const [saving, setSaving] = useState(false);
-  const [search, setSearch] = useState("");
+
+  const [memberSearch, setMemberSearch] = useState("");
+  const [chargeSearch, setChargeSearch] = useState("");
+  const [activeSearch, setActiveSearch] = useState<"member" | "charge" | null>(null);
 
   const [form, setForm] = useState({
     member_id: "",
     entry_date: new Date().toISOString().split("T")[0],
     due_date: "",
     charge_category_id: "",
-    debit_amount: "",
+    amount: "",
+    description_extra: "",
     public_note: "",
     internal_note: "",
   });
@@ -53,7 +59,7 @@ export default function NewChargePage() {
     async function loadData() {
       const { data: memberData } = await supabase
         .from("members")
-        .select("id, member_number, english_first_name, english_surname")
+        .select("id, member_number, english_first_name, english_surname, hebrew_first_name, hebrew_surname")
         .order("english_surname");
 
       const { data: categoryData } = await supabase
@@ -69,30 +75,78 @@ export default function NewChargePage() {
     loadData();
   }, []);
 
-  const filteredChargeItems = useMemo(() => {
-    if (!search.trim()) return chargeItems.slice(0, 8);
+  const filteredMembers = useMemo(() => {
+    const q = memberSearch.trim().toLowerCase();
 
-    const q = search.toLowerCase();
+    return members
+      .filter((m) => {
+        const englishName = `${m.english_first_name} ${m.english_surname}`.toLowerCase();
+        const hebrewName = `${m.hebrew_first_name || ""} ${m.hebrew_surname || ""}`;
+        const memberNumber = `m${m.member_number}`;
+
+        if (!q) return true;
+
+        return (
+          englishName.includes(q) ||
+          hebrewName.includes(memberSearch.trim()) ||
+          memberNumber.includes(q)
+        );
+      })
+      .slice(0, 8);
+  }, [memberSearch, members]);
+
+  const filteredChargeItems = useMemo(() => {
+    const q = chargeSearch.trim().toLowerCase();
 
     return chargeItems
       .filter((item) => {
         const group = item.charge_category_groups?.[0]?.name_en || "";
+        const fullName = `${group} ${item.name_en}`.toLowerCase();
+        const hebrewFullName = `${item.charge_category_groups?.[0]?.name_he || ""} ${item.name_he || ""}`;
+
+        if (!q) return true;
+
         return (
-          item.name_en.toLowerCase().includes(q) ||
-          group.toLowerCase().includes(q) ||
-          (item.search_terms || "").toLowerCase().includes(q)
+          fullName.includes(q) ||
+          (item.search_terms || "").toLowerCase().includes(q) ||
+          hebrewFullName.includes(chargeSearch.trim())
         );
       })
       .slice(0, 8);
-  }, [search, chargeItems]);
+  }, [chargeSearch, chargeItems]);
 
   const selectedCharge = chargeItems.find(
     (item) => item.id === form.charge_category_id
   );
 
-  const description = selectedCharge
+  const chargeItemName = selectedCharge
     ? `${selectedCharge.charge_category_groups?.[0]?.name_en || ""} - ${selectedCharge.name_en}`
     : "";
+
+  const finalDescription = form.description_extra.trim()
+    ? `${chargeItemName} — ${form.description_extra.trim()}`
+    : chargeItemName;
+
+  const selectMember = (member: Member) => {
+    setMemberSearch(
+      `M${member.member_number} - ${member.english_first_name} ${member.english_surname}`
+    );
+    setForm({ ...form, member_id: member.id });
+    setActiveSearch(null);
+  };
+
+  const selectCharge = (item: ChargeItem) => {
+    const name = `${item.charge_category_groups?.[0]?.name_en || ""} - ${item.name_en}`;
+
+    setChargeSearch(name);
+    setForm({
+      ...form,
+      charge_category_id: item.id,
+      amount: item.default_amount ? String(item.default_amount) : "",
+      due_date: addDays(form.entry_date, item.due_days || 0),
+    });
+    setActiveSearch(null);
+  };
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -109,21 +163,11 @@ export default function NewChargePage() {
     setForm({ ...form, [name]: value });
   };
 
-  const selectCharge = (item: ChargeItem) => {
-    setSearch(`${item.charge_category_groups?.[0]?.name_en || ""} - ${item.name_en}`);
-    setForm({
-      ...form,
-      charge_category_id: item.id,
-      debit_amount: item.default_amount ? String(item.default_amount) : "",
-      due_date: addDays(form.entry_date, item.due_days || 0),
-    });
-  };
-
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    if (!form.member_id || !form.entry_date || !form.charge_category_id || !form.debit_amount) {
-      alert("Please fill in member, date, charge item and amount.");
+    if (!form.member_id || !form.entry_date || !form.charge_category_id || !form.amount) {
+      alert("Please select a member, charge item, date and amount.");
       return;
     }
 
@@ -135,8 +179,8 @@ export default function NewChargePage() {
         entry_date: form.entry_date,
         entry_type: "charge",
         charge_category_id: form.charge_category_id,
-        description,
-        debit_amount: Number(form.debit_amount),
+        description: finalDescription,
+        debit_amount: Number(form.amount),
         credit_amount: 0,
         due_date: form.due_date || null,
         public_note: form.public_note,
@@ -158,66 +202,73 @@ export default function NewChargePage() {
     <>
       <section className="hero">
         <h1>Add Charge</h1>
-        <p>Post a charge using searchable charge items.</p>
+        <p>Search a member, choose a charge item, then post to the ledger.</p>
       </section>
 
       <section className="card form-card">
         <form className="form-grid" onSubmit={handleSubmit}>
-          <div className="form-field full">
+          <div className="form-field full" style={{ position: "relative" }}>
             <label>Member *</label>
-            <select name="member_id" value={form.member_id} onChange={handleChange} required>
-              <option value="">Select member</option>
-              {members.map((m) => (
-                <option key={m.id} value={m.id}>
-                  M{m.member_number} - {m.english_first_name} {m.english_surname}
-                </option>
-              ))}
-            </select>
+            <input
+              value={memberSearch}
+              placeholder="Start typing member name, Hebrew name, or M number"
+              onFocus={() => setActiveSearch("member")}
+              onChange={(e) => {
+                setMemberSearch(e.target.value);
+                setForm({ ...form, member_id: "" });
+                setActiveSearch("member");
+              }}
+              required
+            />
+
+            {activeSearch === "member" && (
+              <div className="search-results">
+                {filteredMembers.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    className="search-result"
+                    onMouseDown={() => selectMember(m)}
+                  >
+                    <strong>M{m.member_number} - {m.english_first_name} {m.english_surname}</strong>
+                    <span dir="rtl">
+                      {m.hebrew_first_name} {m.hebrew_surname}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="form-field full" style={{ position: "relative" }}>
             <label>Charge item *</label>
             <input
-              value={search}
+              value={chargeSearch}
+              placeholder="Start typing e.g. shli, chamishi, membership"
+              onFocus={() => setActiveSearch("charge")}
               onChange={(e) => {
-                setSearch(e.target.value);
+                setChargeSearch(e.target.value);
                 setForm({ ...form, charge_category_id: "" });
+                setActiveSearch("charge");
               }}
-              placeholder="Type e.g. shli, chamishi, membership..."
               required
             />
 
-            {!form.charge_category_id && (
-              <div style={{
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                right: 0,
-                background: "white",
-                border: "1px solid #ddd",
-                borderRadius: 12,
-                marginTop: 6,
-                zIndex: 20,
-                overflow: "hidden"
-              }}>
+            {activeSearch === "charge" && (
+              <div className="search-results">
                 {filteredChargeItems.map((item) => (
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => selectCharge(item)}
-                    style={{
-                      display: "block",
-                      width: "100%",
-                      textAlign: "left",
-                      padding: "12px 14px",
-                      background: "white",
-                      border: "none",
-                      borderBottom: "1px solid #eee",
-                      color: "#111"
-                    }}
+                    className="search-result"
+                    onMouseDown={() => selectCharge(item)}
                   >
-                    {item.charge_category_groups?.[0]?.name_en} - {item.name_en}
-                    {item.default_amount ? ` | £${item.default_amount}` : ""}
+                    <strong>
+                      {item.charge_category_groups?.[0]?.name_en} - {item.name_en}
+                    </strong>
+                    <span>
+                      {item.default_amount ? `Default £${item.default_amount}` : "No default amount"}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -226,32 +277,71 @@ export default function NewChargePage() {
 
           <div className="form-field">
             <label>Charge date *</label>
-            <input name="entry_date" type="date" value={form.entry_date} onChange={handleChange} required />
+            <input
+              name="entry_date"
+              type="date"
+              value={form.entry_date}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="form-field">
             <label>Due date</label>
-            <input name="due_date" type="date" value={form.due_date} onChange={handleChange} />
+            <input
+              name="due_date"
+              type="date"
+              value={form.due_date}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="form-field">
             <label>Amount *</label>
-            <input name="debit_amount" type="number" min="0.01" step="0.01" value={form.debit_amount} onChange={handleChange} required />
+            <input
+              name="amount"
+              type="number"
+              min="0.01"
+              step="0.01"
+              value={form.amount}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="form-field full">
-            <label>Description</label>
-            <input value={description} readOnly />
+            <label>Extra description</label>
+            <input
+              name="description_extra"
+              placeholder="Optional, e.g. Shabbos Bereishis"
+              value={form.description_extra}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-field full">
+            <label>Final statement line</label>
+            <input value={finalDescription} readOnly />
           </div>
 
           <div className="form-field full">
             <label>Public note</label>
-            <textarea name="public_note" rows={3} value={form.public_note} onChange={handleChange} />
+            <textarea
+              name="public_note"
+              rows={3}
+              value={form.public_note}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="form-field full">
             <label>Internal note</label>
-            <textarea name="internal_note" rows={3} value={form.internal_note} onChange={handleChange} />
+            <textarea
+              name="internal_note"
+              rows={3}
+              value={form.internal_note}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="form-field full">
