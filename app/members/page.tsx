@@ -1,66 +1,73 @@
-const members = [
-  {
-    id: 1,
-    memberId: "M001",
-    englishName: "Moshe Cohen",
-    hebrewName: "משה כהן",
-    phone: "07700 900001",
-    email: "moshe@example.com",
-    membershipType: "Full",
-    balance: 350,
-    status: "Active",
-  },
-  {
-    id: 2,
-    memberId: "M002",
-    englishName: "Yaakov Levy",
-    hebrewName: "יעקב לוי",
-    phone: "07700 900002",
-    email: "yaakov@example.com",
-    membershipType: "Family",
-    balance: 120,
-    status: "Active",
-  },
-];
-
 export default function MembersPage() {
+  const members = [
+    {
+      id: 1,
+      memberId: "M001",
+      englishName: "Moshe Cohen",
+      hebrewName: "משה כהן",
+      phone: "07700 900001",
+      email: "moshe@example.com",
+      membershipType: "Full",
+      balance: 350,
+      status: "Active",
+    },
+    {
+      id: 2,
+      memberId: "M002",
+      englishName: "Yaakov Levy",
+      hebrewName: "יעקב לוי",
+      phone: "07700 900002",
+      email: "yaakov@example.com",
+      membershipType: "Family",
+      balance: 120,
+      status: "Active",
+    },
+  ];
+
   return (
-    <main style={{ padding: "40px", fontFamily: "Arial, sans-serif" }}>
-      <h1>Members</h1>
-      <p>Admin member list.</p>
+    <div className="page">
+      <div className="header-row">
+        <div>
+          <h1>Members</h1>
+          <p className="muted">Manage shul members</p>
+        </div>
 
-      <button style={{ margin: "20px 0", padding: "10px 16px" }}>
-        Add Member
-      </button>
+        <a href="/members/new">
+          <button>Add Member</button>
+        </a>
+      </div>
 
-      <table border={1} cellPadding={10} cellSpacing={0}>
-        <thead>
-          <tr>
-            <th>Member ID</th>
-            <th>English Name</th>
-            <th>Hebrew Name</th>
-            <th>Phone</th>
-            <th>Email</th>
-            <th>Membership Type</th>
-            <th>Balance</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {members.map((member) => (
-            <tr key={member.id}>
-              <td>{member.memberId}</td>
-              <td>{member.englishName}</td>
-              <td dir="rtl">{member.hebrewName}</td>
-              <td>{member.phone}</td>
-              <td>{member.email}</td>
-              <td>{member.membershipType}</td>
-              <td>£{member.balance.toFixed(2)}</td>
-              <td>{member.status}</td>
+      <div className="card">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Member ID</th>
+              <th>Name</th>
+              <th>Hebrew</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Type</th>
+              <th>Balance</th>
+              <th>Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </main>
+          </thead>
+
+          <tbody>
+            {members.map((m) => (
+              <tr key={m.id}>
+                <td>{m.memberId}</td>
+                <td>{m.englishName}</td>
+                <td dir="rtl">{m.hebrewName}</td>
+                <td>{m.phone}</td>
+                <td>{m.email}</td>
+                <td>{m.membershipType}</td>
+                <td className="balance">£{m.balance}</td>
+                <td>{m.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
