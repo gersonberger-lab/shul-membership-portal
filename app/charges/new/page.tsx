@@ -61,7 +61,7 @@ export default function NewChargePage() {
         .order("sort_order");
 
       setMembers(memberData || []);
-      setChargeItems((categoryData as ChargeItem[]) || []);
+      setChargeItems((categoryData as unknown as ChargeItem[]) || []);
     }
 
     loadData();
