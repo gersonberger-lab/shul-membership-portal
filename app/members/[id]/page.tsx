@@ -69,8 +69,8 @@ export default async function MemberStatementPage({
                     <tr key={entry.id}>
                       <td>{entry.entry_date}</td>
                       <td>{entry.description}</td>
-                      <td>{debit > 0 ? £${debit.toFixed(2)} : ""}</td>
-                      <td>{credit > 0 ? £${credit.toFixed(2)} : ""}</td>
+                      <td>{debit > 0 ? `£${debit.toFixed(2)}` : ""}</td>
+                      <td>{credit > 0 ? `£${credit.toFixed(2)}` : ""}</td>
                       <td className="balance">£{runningBalance.toFixed(2)}</td>
                     </tr>
                   );
