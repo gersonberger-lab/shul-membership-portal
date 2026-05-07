@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../../../lib/supabase";
 import { useRouter } from "next/navigation";
+import HebrewKeyboardInput from "../../../components/HebrewKeyboardInput";
 
 type Group = {
   id: string;
@@ -17,7 +18,7 @@ export default function NewChargeItemPage() {
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
-    charge_category_group_id: "",
+    group_id: "",
     name_en: "",
     name_he: "",
     default_amount: "",
@@ -43,10 +44,14 @@ export default function NewChargeItemPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const setField = (name: string, value: string) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    if (!form.charge_category_group_id || !form.name_en.trim()) {
+    if (!form.group_id || !form.name_en.trim()) {
       alert("Please complete the required fields.");
       return;
     }
@@ -55,7 +60,7 @@ export default function NewChargeItemPage() {
 
     const { error } = await supabase.from("charge_categories").insert([
       {
-        charge_category_group_id: form.charge_category_group_id,
+        group_id: form.group_id,
         name_en: form.name_en.trim(),
         name_he: form.name_he.trim() || null,
         default_amount: form.default_amount
@@ -89,8 +94,8 @@ export default function NewChargeItemPage() {
           <div className="form-field full">
             <label>Category group *</label>
             <select
-              name="charge_category_group_id"
-              value={form.charge_category_group_id}
+              name="group_id"
+              value={form.group_id}
               onChange={handleChange}
               required
             >
@@ -115,17 +120,13 @@ export default function NewChargeItemPage() {
             />
           </div>
 
-          <div className="form-field">
-            <label>Hebrew charge item</label>
-            <input
-              name="name_he"
-              value={form.name_he}
-              onChange={handleChange}
-              placeholder="e.g. שלישי"
-              dir="rtl"
-              lang="he"
-            />
-          </div>
+          <HebrewKeyboardInput
+            label="Hebrew charge item"
+            name="name_he"
+            value={form.name_he}
+            onChange={setField}
+            placeholder="e.g. שלישי"
+          />
 
           <div className="form-field">
             <label>Default amount</label>
