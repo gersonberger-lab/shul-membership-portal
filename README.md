@@ -1,4 +1,4 @@
-# Shul Membership Portal by Zevi
+# Shul Membership Portal by Zevi G
 
 Bilingual (English / Hebrew) shul membership, donations, ledger and member portal.
 
