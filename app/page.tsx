@@ -90,6 +90,9 @@ export default async function HomePage({
           <a className={range !== "6" ? "button" : "button secondary"} href="/?range=12">
             12 Months
           </a>
+          <a className="button" href="/charges/batch">
+            Batch Charges
+          </a>
         </div>
       </section>
 
@@ -149,8 +152,9 @@ export default async function HomePage({
         <div className="card">
           <h3 className="section-title">Quick Actions</h3>
           <div className="quick-links">
+            <a href="/charges/batch">Batch Charges</a>
             <a href="/members">Open Members</a>
-            <a href="/charges/new">Add Charge</a>
+            <a href="/charges/new">Single Charge</a>
             <a href="/payments/new">Add Payment</a>
             <a href="/settings/categories">Manage Categories</a>
           </div>
