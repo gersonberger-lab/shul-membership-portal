@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./hebrew-keyboard.css";
 import type { Metadata } from "next";
 import AppShell from "./components/AppShell";
 
