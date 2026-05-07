@@ -3,12 +3,14 @@
 }
 
 :root {
-  --bg: #f5f7fb;
+  --bg: #f6f3ee;
   --card: #ffffff;
-  --line: #e7ecf3;
-  --line-soft: #eef2f7;
+  --surface: #fbf8f3;
+  --surface-strong: #f3ede3;
+  --line: #e4d9c9;
+  --line-soft: #efe7db;
   --text: #172033;
-  --muted: #64748b;
+  --muted: #687386;
   --nav-active: linear-gradient(135deg, #c7a56a, #a88445);
   --primary-1: #c7a56a;
   --primary-2: #a88445;
@@ -58,7 +60,7 @@ textarea {
   align-items: center;
   gap: 18px;
   padding: 14px 28px;
-  background: rgba(245, 247, 251, 0.92);
+  background: rgba(246, 243, 238, 0.92);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(14px);
 }
@@ -117,7 +119,7 @@ textarea {
 }
 
 .top-nav a:hover {
-  background: #f8fafc;
+  background: var(--surface);
   color: var(--text);
 }
 
@@ -186,6 +188,7 @@ textarea {
 
 .form-card {
   max-width: 980px;
+  background: linear-gradient(180deg, #ffffff 0%, #fffdf9 100%);
 }
 
 button,
@@ -239,13 +242,13 @@ button:disabled {
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  gap: 20px;
 }
 
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
 }
 
 .form-field.full {
@@ -253,38 +256,55 @@ button:disabled {
 }
 
 .form-field label {
-  color: #4b5563;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #2f3848;
   font-size: 13px;
   font-weight: 800;
   letter-spacing: -0.01em;
   text-transform: none;
+  margin-left: 2px;
 }
 
 .form-field input,
 .form-field select,
 .form-field textarea {
   width: 100%;
-  border: 1px solid var(--line);
-  background: #fbfcfe;
-  padding: 14px 15px;
-  border-radius: 14px;
-  font-size: 14px;
+  border: 1px solid #ded2c1;
+  background: #fffdfa;
+  padding: 15px 16px;
+  border-radius: 16px;
+  font-size: 15px;
   outline: none;
-  transition: 0.16s ease;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
   color: var(--text);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 0 rgba(15,23,42,0.02);
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+  color: #a0a8b6;
+}
+
+.form-field input:hover,
+.form-field select:hover,
+.form-field textarea:hover {
+  border-color: #cbb89d;
+  background: white;
 }
 
 .form-field input:focus,
 .form-field select:focus,
 .form-field textarea:focus {
-  border-color: #d9c39a;
+  border-color: var(--primary-2);
   background: white;
-  box-shadow: 0 0 0 4px rgba(199, 165, 106, 0.14);
+  box-shadow: 0 0 0 4px rgba(199, 165, 106, 0.16), 0 12px 26px rgba(15, 23, 42, 0.06);
 }
 
 .form-field textarea {
   resize: vertical;
-  min-height: 110px;
+  min-height: 112px;
 }
 
 .table-wrap {
@@ -307,7 +327,7 @@ button:disabled {
   border-bottom: 1px solid var(--line);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  background: #fafcff;
+  background: #faf7f1;
 }
 
 .table td {
@@ -317,7 +337,7 @@ button:disabled {
 }
 
 .table tr:hover td {
-  background: #fafcff;
+  background: #fffaf0;
 }
 
 .balance {
@@ -387,7 +407,7 @@ button:disabled {
 .stat-card {
   padding: 18px;
   box-shadow: none;
-  background: #fafcff;
+  background: #fffaf0;
 }
 
 .stat-card span {
@@ -423,7 +443,7 @@ button:disabled {
 .quick-links a {
   padding: 12px 14px;
   border-radius: 14px;
-  background: #f8fafc;
+  background: #fffaf0;
   border: 1px solid var(--line-soft);
   font-weight: 700;
 }
@@ -431,7 +451,7 @@ button:disabled {
 .quick-links a:hover,
 .settings-card:hover {
   border-color: #d9c39a;
-  background: #fffaf0;
+  background: #fff4df;
 }
 
 .account-grid {
@@ -497,7 +517,7 @@ button:disabled {
 }
 
 .summary-row div {
-  background: #f8fafc;
+  background: #fffaf0;
   border: 1px solid var(--line-soft);
   border-radius: 18px;
   padding: 16px;
