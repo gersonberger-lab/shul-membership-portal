@@ -90,9 +90,6 @@ export default async function HomePage({
           <a className={range !== "6" ? "button" : "button secondary"} href="/?range=12">
             12 Months
           </a>
-          <a className="button" href="/charges/batch">
-            Batch Charges
-          </a>
         </div>
       </section>
 
