@@ -19,7 +19,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-shell top-shell">
-      <header className="site-header">
+      <header className="site-header simple-header">
         <a className="brand-card top-brand" href="/">
           <div className="brand-mark">SP</div>
           <div>
@@ -39,10 +39,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </a>
           ))}
         </nav>
-
-        <a className="button compact" href="/members/new">
-          Add Member
-        </a>
       </header>
 
       <main className="main-area top-main">{children}</main>
