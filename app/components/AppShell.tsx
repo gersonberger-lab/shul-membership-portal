@@ -3,58 +3,48 @@
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: "D" },
-  { href: "/members", label: "Members", icon: "M" },
-  { href: "/members/new", label: "Add Member", icon: "+" },
-  { href: "/charges/new", label: "Add Charge", icon: "C" },
-  { href: "/payments/new", label: "Add Payment", icon: "P" },
+  { href: "/", label: "Dashboard" },
+  { href: "/members", label: "Members" },
+  { href: "/diary", label: "Diary" },
 ];
 
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
-  if (href === "/members") return pathname === "/members" || pathname.startsWith("/members/");
-  return pathname === href;
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand-card">
+    <div className="app-shell top-shell">
+      <header className="site-header">
+        <a className="brand-card top-brand" href="/">
           <div className="brand-mark">SP</div>
           <div>
             <div className="logo">Shul Portal</div>
             <div className="brand-subtitle">Membership and donations</div>
           </div>
-        </div>
+        </a>
 
-        <nav className="nav" aria-label="Main navigation">
+        <nav className="top-nav" aria-label="Main navigation">
           {navItems.map((item) => (
             <a
               key={item.href}
               href={item.href}
               className={isActive(pathname, item.href) ? "active" : ""}
             >
-              <span className="nav-icon">{item.icon}</span>
-              <span>{item.label}</span>
+              {item.label}
             </a>
           ))}
         </nav>
-      </aside>
 
-      <div className="content-shell">
-        <header className="topbar">
-          <div>
-            <span className="eyebrow">Shul management</span>
-            <h2>Membership Portal</h2>
-          </div>
-          <a className="button secondary compact" href="/members">View Members</a>
-        </header>
+        <a className="button compact" href="/members/new">
+          Add Member
+        </a>
+      </header>
 
-        <main className="main-area">{children}</main>
-      </div>
+      <main className="main-area top-main">{children}</main>
     </div>
   );
 }
