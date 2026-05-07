@@ -51,15 +51,31 @@ export default async function CategoriesPage() {
               }}
             >
               <div>
-                <h3 className="section-title" style={{ marginBottom: 4 }}>
-                  {group.name_en}
-                </h3>
+                <h3
+                  className="section-title"
+                  style={{
+                    marginBottom: 0,
+                    display: "flex",
+                    alignItems: "baseline",
+                    gap: 12,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span>{group.name_en}</span>
 
-                {!!group.name_he && (
-                  <div dir="rtl" className="muted">
-                    {group.name_he}
-                  </div>
-                )}
+                  {!!group.name_he && (
+                    <span
+                      dir="rtl"
+                      style={{
+                        fontSize: "1em",
+                        fontWeight: 800,
+                        color: "#7a5a22",
+                      }}
+                    >
+                      {group.name_he}
+                    </span>
+                  )}
+                </h3>
               </div>
             </div>
 
