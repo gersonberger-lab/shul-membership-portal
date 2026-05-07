@@ -36,15 +36,22 @@ export default async function MemberAccountPage({
       <section className="hero">
         <div style={{ display: "flex", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}>
           <div>
-            <h1>
-              {member?.english_first_name} {member?.english_surname}
+            <h1 style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "baseline" }}>
+              <span>
+                {member?.english_first_name} {member?.english_surname}
+              </span>
+
+              <span
+                dir="rtl"
+                style={{
+                  fontSize: "0.9em",
+                  fontWeight: 800,
+                  color: "#7a5a22",
+                }}
+              >
+                {member?.hebrew_first_name} {member?.hebrew_surname}
+              </span>
             </h1>
-
-            <p className="hebrew-title" dir="rtl">
-              {member?.hebrew_first_name} {member?.hebrew_surname}
-            </p>
-
-            <p>Member No. {member?.member_number}</p>
           </div>
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-start" }}>
