@@ -41,7 +41,15 @@ export default async function CategoriesPage() {
       <div style={{ display: "grid", gap: 22 }}>
         {groups?.map((group) => (
           <section key={group.id} className="card">
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 20, alignItems: "center", marginBottom: 18 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 20,
+                alignItems: "center",
+                marginBottom: 18,
+              }}
+            >
               <div>
                 <h3 className="section-title" style={{ marginBottom: 4 }}>
                   {group.name_en}
@@ -69,6 +77,7 @@ export default async function CategoriesPage() {
                       <th>Default Amount</th>
                       <th>Due Days</th>
                       <th>Status</th>
+                      <th></th>
                     </tr>
                   </thead>
 
@@ -93,6 +102,15 @@ export default async function CategoriesPage() {
                           <span className="badge">
                             {item.active ? "Active" : "Inactive"}
                           </span>
+                        </td>
+
+                        <td>
+                          <a
+                            className="button secondary compact"
+                            href={`/settings/categories/${item.id}/edit`}
+                          >
+                            Edit
+                          </a>
                         </td>
                       </tr>
                     ))}
