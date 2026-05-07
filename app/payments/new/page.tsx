@@ -44,8 +44,6 @@ export default function NewPaymentPage() {
     amount: "",
     payment_method: "",
     reference: "",
-    public_note: "",
-    internal_note: "",
   });
 
   useEffect(() => {
@@ -94,6 +92,17 @@ export default function NewPaymentPage() {
       .slice(0, 8);
   }, [memberSearch, members]);
 
+  const selectedMember = members.find((member) => member.id === form.member_id);
+  const amountNumber = Number(form.amount || 0);
+
+  const description = [
+    "Payment received",
+    form.payment_method ? form.payment_method : "",
+    form.reference ? `Ref: ${form.reference}` : "",
+  ]
+    .filter(Boolean)
+    .join(" - ");
+
   const handleChange = (e: any) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
@@ -105,19 +114,11 @@ export default function NewPaymentPage() {
     setActiveSearch(false);
   };
 
-  const finalDescription = [
-    "Payment received",
-    form.payment_method ? `by ${form.payment_method}` : "",
-    form.reference ? `Ref: ${form.reference}` : "",
-  ]
-    .filter(Boolean)
-    .join(" - ");
-
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
     if (!form.member_id || !form.entry_date || !form.amount || !form.payment_method) {
-      alert("Please select a member, payment date, payment method and amount.");
+      alert("Please select a member, date, amount and payment method.");
       return;
     }
 
@@ -128,11 +129,9 @@ export default function NewPaymentPage() {
         member_id: form.member_id,
         entry_date: form.entry_date,
         entry_type: "payment",
-        description: finalDescription,
+        description,
         debit_amount: 0,
-        credit_amount: Number(form.amount),
-        public_note: form.public_note,
-        internal_note: form.internal_note,
+        credit_amount: amountNumber,
         status: "posted",
       },
     ]);
@@ -149,134 +148,130 @@ export default function NewPaymentPage() {
 
   return (
     <>
-      <section className="hero">
-        <span className="eyebrow">Ledger</span>
+      <section className="hero compact-hero">
+        <span className="eyebrow">Simple Ledger</span>
         <h1>Add Payment</h1>
-        <p>Record a payment against a member account.</p>
+        <p>Post one payment as a credit against the member’s running balance.</p>
       </section>
 
-      <section className="card form-card">
-        <form className="form-grid" onSubmit={handleSubmit}>
-          <div className="form-field full" style={{ position: "relative" }}>
-            <label>Member *</label>
-            <input
-              value={memberSearch}
-              placeholder="Start typing member name, Hebrew name, or email"
-              onFocus={() => setActiveSearch(true)}
-              onChange={(e) => {
-                setMemberSearch(e.target.value);
-                setForm({ ...form, member_id: "" });
-                setActiveSearch(true);
-              }}
-              required
-            />
+      <section className="card payment-entry-card">
+        <form className="payment-layout" onSubmit={handleSubmit}>
+          <div className="payment-main">
+            <div className="form-field full" style={{ position: "relative" }}>
+              <label>Member *</label>
+              <input
+                value={memberSearch}
+                placeholder="Start typing member name, Hebrew name, or email"
+                onFocus={() => setActiveSearch(true)}
+                onChange={(e) => {
+                  setMemberSearch(e.target.value);
+                  setForm({ ...form, member_id: "" });
+                  setActiveSearch(true);
+                }}
+                required
+              />
 
-            {activeSearch && (
-              <div className="search-results">
-                {filteredMembers.map((member) => (
-                  <button
-                    key={member.id}
-                    type="button"
-                    className="search-result"
-                    onMouseDown={() => selectMember(member)}
-                  >
-                    <strong>{memberDisplayName(member)}</strong>
-                    <span dir="rtl">
-                      {member.hebrew_first_name} {member.hebrew_surname}
-                    </span>
-                  </button>
-                ))}
+              {activeSearch && (
+                <div className="search-results">
+                  {filteredMembers.map((member) => (
+                    <button
+                      key={member.id}
+                      type="button"
+                      className="search-result"
+                      onMouseDown={() => selectMember(member)}
+                    >
+                      <strong>{memberDisplayName(member)}</strong>
+                      <span dir="rtl">
+                        {member.hebrew_first_name} {member.hebrew_surname}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="payment-grid">
+              <div className="form-field">
+                <label>Amount *</label>
+                <input
+                  name="amount"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  value={form.amount}
+                  onChange={handleChange}
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+
+              <div className="form-field">
+                <label>Date *</label>
+                <input
+                  name="entry_date"
+                  type="date"
+                  value={form.entry_date}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-field">
+                <label>Method *</label>
+                <select
+                  name="payment_method"
+                  value={form.payment_method}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select...</option>
+                  {paymentMethods.map((method) => (
+                    <option key={method} value={method}>
+                      {method}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-field">
+                <label>Reference</label>
+                <input
+                  name="reference"
+                  value={form.reference}
+                  onChange={handleChange}
+                  placeholder="Cheque / voucher / bank ref"
+                />
+              </div>
+            </div>
+          </div>
+
+          <aside className="payment-summary-box">
+            <span>Payment Total</span>
+            <strong>£{amountNumber.toFixed(2)}</strong>
+
+            {selectedMember && (
+              <div className="payment-member-pill">
+                <b>{memberDisplayName(selectedMember)}</b>
+                {(selectedMember.hebrew_first_name || selectedMember.hebrew_surname) && (
+                  <small dir="rtl">
+                    {selectedMember.hebrew_first_name} {selectedMember.hebrew_surname}
+                  </small>
+                )}
               </div>
             )}
-          </div>
 
-          <div className="form-field">
-            <label>Payment amount *</label>
-            <input
-              name="amount"
-              type="number"
-              step="0.01"
-              min="0.01"
-              value={form.amount}
-              onChange={handleChange}
-              placeholder="e.g. 180"
-              required
-            />
-          </div>
+            <div className="payment-description-preview">
+              {description || "Payment received"}
+            </div>
 
-          <div className="form-field">
-            <label>Payment date *</label>
-            <input
-              name="entry_date"
-              type="date"
-              value={form.entry_date}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="form-field">
-            <label>Payment method *</label>
-            <select
-              name="payment_method"
-              value={form.payment_method}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select method...</option>
-
-              {paymentMethods.map((method) => (
-                <option key={method} value={method}>
-                  {method}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-field">
-            <label>Reference</label>
-            <input
-              name="reference"
-              value={form.reference}
-              onChange={handleChange}
-              placeholder="Cheque no, voucher no, bank ref..."
-            />
-          </div>
-
-          <div className="form-field full">
-            <label>Final statement line</label>
-            <input value={finalDescription} readOnly />
-          </div>
-
-          <div className="form-field full">
-            <label>Public note</label>
-            <textarea
-              name="public_note"
-              value={form.public_note}
-              onChange={handleChange}
-              placeholder="Optional note visible on statements"
-            />
-          </div>
-
-          <div className="form-field full">
-            <label>Internal note</label>
-            <textarea
-              name="internal_note"
-              value={form.internal_note}
-              onChange={handleChange}
-              placeholder="Internal office note"
-            />
-          </div>
-
-          <div className="form-field full" style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <button type="submit" disabled={saving}>
-              {saving ? "Saving..." : "Save Payment"}
+              {saving ? "Posting..." : "Post Payment"}
             </button>
 
             <a className="button secondary" href="/members">
               Cancel
             </a>
-          </div>
+          </aside>
         </form>
       </section>
     </>
