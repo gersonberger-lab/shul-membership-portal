@@ -59,12 +59,10 @@ export default function MembersPage() {
     return members.filter((m) => {
       const englishName = `${m.english_first_name} ${m.english_surname}`.toLowerCase();
       const hebrewName = `${m.hebrew_first_name || ""} ${m.hebrew_surname || ""}`;
-      const memberNumber = `m${m.member_number}`;
 
       return (
         englishName.includes(q) ||
         hebrewName.includes(search.trim()) ||
-        memberNumber.includes(q) ||
         (m.email || "").toLowerCase().includes(q)
       );
     });
@@ -87,7 +85,7 @@ export default function MembersPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Type name, Hebrew name, member number, or email..."
+            placeholder="Type name, Hebrew name, or email..."
           />
         </div>
       </section>
@@ -96,7 +94,6 @@ export default function MembersPage() {
         <table className="table">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Name</th>
               <th>Hebrew</th>
               <th>Email</th>
@@ -117,7 +114,6 @@ export default function MembersPage() {
 
               return (
                 <tr key={m.id}>
-                  <td>M{m.member_number}</td>
                   <td>
                     <a href={`/members/${m.id}`}>
                       <strong>
