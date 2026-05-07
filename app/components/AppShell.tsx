@@ -6,6 +6,7 @@ const navItems = [
   { href: "/", label: "Dashboard" },
   { href: "/members", label: "Members" },
   { href: "/diary", label: "Diary" },
+  { href: "/settings", label: "Settings" },
 ];
 
 function isActive(pathname: string, href: string) {
