@@ -3,18 +3,10 @@
 import { useState } from "react";
 
 const rows = [
-  ["ק", "ר", "א", "ט", "ו", "ן", "ם", "פ"],
-  ["ש", "ד", "ג", "כ", "ע", "י", "ח", "ל", "ך", "ף"],
-  ["ז", "ס", "ב", "ה", "נ", "מ", "צ", "ת", "ץ"],
+  ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט"],
+  ["י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ"],
+  ["ק", "ר", "ש", "ת", "ך", "ם", "ן", "ף", "ץ"],
 ];
-
-const finalMap: Record<string, string> = {
-  כ: "ך",
-  מ: "ם",
-  נ: "ן",
-  פ: "ף",
-  צ: "ץ",
-};
 
 export default function HebrewKeyboardInput({
   label,
@@ -88,30 +80,37 @@ export default function HebrewKeyboardInput({
             </div>
           ))}
 
-          <div className="hebrew-keyboard-row">
-            {Object.entries(finalMap).map(([regular, final]) => (
-              <button
-                key={final}
-                type="button"
-                className="hebrew-key small"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  addLetter(final);
-                }}
-              >
-                {regular}/{final}
-              </button>
-            ))}
-          </div>
-
           <div className="hebrew-keyboard-row actions">
-            <button type="button" className="hebrew-key wide" onMouseDown={(e) => { e.preventDefault(); addSpace(); }}>
+            <button
+              type="button"
+              className="hebrew-key wide"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                addSpace();
+              }}
+            >
               Space
             </button>
-            <button type="button" className="hebrew-key wide" onMouseDown={(e) => { e.preventDefault(); backspace(); }}>
+
+            <button
+              type="button"
+              className="hebrew-key wide"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                backspace();
+              }}
+            >
               Delete
             </button>
-            <button type="button" className="hebrew-key wide" onMouseDown={(e) => { e.preventDefault(); setOpen(false); }}>
+
+            <button
+              type="button"
+              className="hebrew-key wide"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                setOpen(false);
+              }}
+            >
               Done
             </button>
           </div>
