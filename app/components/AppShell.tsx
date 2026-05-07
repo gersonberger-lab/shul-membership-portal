@@ -3,14 +3,22 @@
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { href: "/", label: "Dashboard" },
   { href: "/members", label: "Members" },
+  { href: "/charges/batch", label: "Charges" },
+  { href: "/payments/new", label: "Payments" },
   { href: "/diary", label: "Diary" },
   { href: "/settings", label: "Settings" },
 ];
 
 function isActive(pathname: string, href: string) {
-  if (href === "/") return pathname === "/";
+  if (href === "/charges/batch") {
+    return pathname.startsWith("/charges");
+  }
+
+  if (href === "/payments/new") {
+    return pathname.startsWith("/payments");
+  }
+
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -24,11 +32,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="brand-mark">SP</div>
           <div>
             <div className="logo">Shul Portal</div>
-            <div className="brand-subtitle">Membership and donations</div>
+            <div className="brand-subtitle">Membership and accounts</div>
           </div>
         </a>
 
-        <nav className="top-nav" aria-label="Main navigation">
+        <nav className="top-nav">
           {navItems.map((item) => (
             <a
               key={item.href}
