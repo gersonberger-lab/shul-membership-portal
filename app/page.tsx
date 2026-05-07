@@ -1,7 +1,7 @@
 export default function HomePage() {
   return (
     <main style={{ padding: "40px", fontFamily: "Arial, sans-serif" }}>
-      <h1>Shul Membership Portal</h1>
+      <h1>Shul Membership Portal by ZG</h1>
       <p>Starter app is live.</p>
 
       <div style={{ marginTop: "30px" }}>
