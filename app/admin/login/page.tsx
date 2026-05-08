@@ -8,17 +8,17 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [signup, setSignup] = useState(false);
 
-  async function handleLogin(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
     setLoading(true);
     setError("");
 
-    const result = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const result = signup
+      ? await supabase.auth.signUp({ email, password })
+      : await supabase.auth.signInWithPassword({ email, password });
 
     setLoading(false);
 
@@ -32,9 +32,9 @@ export default function AdminLoginPage() {
 
   return (
     <div className="auth-screen">
-      <form className="auth-card" onSubmit={handleLogin}>
+      <form className="auth-card" onSubmit={handleSubmit}>
         <span className="eyebrow">Admin</span>
-        <h1>Sign In</h1>
+        <h1>{signup ? "Create Admin Account" : "Sign In"}</h1>
 
         <div className="form-field">
           <label>Email</label>
@@ -59,7 +59,15 @@ export default function AdminLoginPage() {
         {error ? <div className="auth-error">{error}</div> : null}
 
         <button type="submit" disabled={loading}>
-          {loading ? "Signing in..." : "Sign In"}
+          {loading ? "Please wait..." : signup ? "Create Account" : "Sign In"}
+        </button>
+
+        <button
+          type="button"
+          className="button secondary"
+          onClick={() => setSignup(!signup)}
+        >
+          {signup ? "Already have an account?" : "Create first admin account"}
         </button>
       </form>
     </div>
