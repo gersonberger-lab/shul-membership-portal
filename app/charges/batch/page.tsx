@@ -31,6 +31,7 @@ type ChargeRow = {
   charge_category_id: string;
   chargeName: string;
   amount: string;
+  descriptionExtra: string;
 };
 
 function addDays(dateString: string, days: number) {
@@ -48,12 +49,18 @@ function chargeName(item: ChargeItem) {
   return group ? `${group} ${item.name_en}` : item.name_en;
 }
 
+function rowDescription(row: ChargeRow) {
+  const extra = row.descriptionExtra.trim();
+  return extra ? `${row.chargeName} — ${extra}` : row.chargeName;
+}
+
 function blankRow(): ChargeRow {
   return {
     tempId: crypto.randomUUID(),
     charge_category_id: "",
     chargeName: "",
     amount: "",
+    descriptionExtra: "",
   };
 }
 
@@ -168,7 +175,7 @@ export default function BatchChargePage() {
         entry_date: entryDate,
         entry_type: "charge",
         charge_category_id: row.charge_category_id,
-        description: row.chargeName,
+        description: rowDescription(row),
         debit_amount: Number(row.amount),
         credit_amount: 0,
         due_date: item ? addDays(entryDate, item.due_days || 0) : null,
@@ -243,11 +250,12 @@ export default function BatchChargePage() {
           </div>
         )}
 
-        <div className="batch-table">
+        <div className="batch-table batch-table-with-description">
           <div className="batch-table-head">
             <div>#</div>
             <div>Charge</div>
             <div>Amount</div>
+            <div>Description</div>
             <div></div>
           </div>
 
@@ -291,6 +299,12 @@ export default function BatchChargePage() {
                 value={row.amount}
                 onChange={(event) => updateRow(row.tempId, { amount: event.target.value })}
                 onKeyDown={(event) => handleAmountKeyDown(event, index)}
+              />
+
+              <input
+                value={row.descriptionExtra}
+                placeholder="Optional description"
+                onChange={(event) => updateRow(row.tempId, { descriptionExtra: event.target.value })}
               />
 
               <button type="button" className="button secondary compact" onClick={() => removeRow(row.tempId)}>
