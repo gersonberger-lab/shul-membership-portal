@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import AuthGate from "./AuthGate";
 
 const navItems = [
   { href: "/members", label: "Members" },
@@ -21,10 +20,6 @@ function isPortal(pathname: string) {
   return pathname === "/portal" || pathname.startsWith("/portal/");
 }
 
-function isPublic(pathname: string) {
-  return pathname === "/admin/login" || pathname === "/portal/login";
-}
-
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
@@ -32,49 +27,35 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     return <div className="auth-shell">{children}</div>;
   }
 
-  if (pathname === "/portal/login") {
+  if (pathname === "/portal/login" || isPortal(pathname)) {
     return <div className="member-portal-shell">{children}</div>;
   }
 
-  if (isPortal(pathname)) {
-    return (
-      <div className="member-portal-shell">
-        <AuthGate mode="member">{children}</AuthGate>
-      </div>
-    );
-  }
+  return (
+    <div className="app-shell top-shell">
+      <header className="site-header simple-header">
+        <a className="brand-card top-brand" href="/">
+          <div className="brand-mark">SP</div>
+          <div>
+            <div className="logo">Shul Portal</div>
+            <div className="brand-subtitle">Membership and accounts</div>
+          </div>
+        </a>
 
-  if (!isPublic(pathname)) {
-    return (
-      <AuthGate mode="admin">
-        <div className="app-shell top-shell">
-          <header className="site-header simple-header">
-            <a className="brand-card top-brand" href="/">
-              <div className="brand-mark">SP</div>
-              <div>
-                <div className="logo">Shul Portal</div>
-                <div className="brand-subtitle">Membership and accounts</div>
-              </div>
+        <nav className="top-nav">
+          {navItems.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className={isActive(pathname, item.href) ? "active" : ""}
+            >
+              {item.label}
             </a>
+          ))}
+        </nav>
+      </header>
 
-            <nav className="top-nav">
-              {navItems.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className={isActive(pathname, item.href) ? "active" : ""}
-                >
-                  {item.label}
-                </a>
-              ))}
-            </nav>
-          </header>
-
-          <main className="main-area top-main">{children}</main>
-        </div>
-      </AuthGate>
-    );
-  }
-
-  return <>{children}</>;
+      <main className="main-area top-main">{children}</main>
+    </div>
+  );
 }
