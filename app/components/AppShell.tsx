@@ -11,19 +11,28 @@ const navItems = [
 ];
 
 function isActive(pathname: string, href: string) {
-  if (href === "/charges/batch") {
-    return pathname.startsWith("/charges");
-  }
-
-  if (href === "/payments/new") {
-    return pathname.startsWith("/payments");
-  }
-
+  if (href === "/charges/batch") return pathname.startsWith("/charges");
+  if (href === "/payments/new") return pathname.startsWith("/payments");
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function isPortal(pathname: string) {
+  return (
+    pathname === "/portal" ||
+    pathname.startsWith("/portal/") ||
+    pathname === "/member-portal" ||
+    pathname.startsWith("/member-portal/") ||
+    pathname === "/my-account" ||
+    pathname.startsWith("/my-account/")
+  );
 }
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+
+  if (isPortal(pathname)) {
+    return <div className="member-portal-shell">{children}</div>;
+  }
 
   return (
     <div className="app-shell top-shell">
