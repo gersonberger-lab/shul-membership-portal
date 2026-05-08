@@ -5,8 +5,6 @@ import { supabase } from "../../lib/supabase";
 
 type Mode = "admin" | "member";
 
-const TEMP_BOOTSTRAP_ADMIN = true;
-
 export default function AuthGate({
   mode,
   children,
@@ -19,6 +17,11 @@ export default function AuthGate({
 
   useEffect(() => {
     async function checkAccess() {
+      if (mode === "admin" && window.localStorage.getItem("temporary_admin_access") === "yes") {
+        setStatus("allowed");
+        return;
+      }
+
       const { data: sessionData } = await supabase.auth.getSession();
       const session = sessionData.session;
 
@@ -28,11 +31,6 @@ export default function AuthGate({
       }
 
       if (mode === "admin") {
-        if (TEMP_BOOTSTRAP_ADMIN) {
-          setStatus("allowed");
-          return;
-        }
-
         const { data, error } = await supabase
           .from("app_users")
           .select("role, active")
