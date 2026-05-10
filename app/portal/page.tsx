@@ -118,7 +118,7 @@ export default function MemberPortalPage() {
             <p className="muted">Your recent charges and payments.</p>
           </div>
 
-          <a className="button" href="/payments/new">
+          <a className="button" href="/portal/pay">
             Make Payment
           </a>
         </div>
