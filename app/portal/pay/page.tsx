@@ -13,6 +13,14 @@ export default function PortalPayPage() {
   const [entries, setEntries] = useState<any[]>([]);
   const [email, setEmail] = useState<string | null>(null);
   const [amount, setAmount] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 760);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -49,10 +57,7 @@ export default function PortalPayPage() {
   }, []);
 
   const balance = useMemo(() => {
-    return entries.reduce(
-      (sum, entry) => sum + Number(entry.debit_amount || 0) - Number(entry.credit_amount || 0),
-      0
-    );
+    return entries.reduce((sum, entry) => sum + Number(entry.debit_amount || 0) - Number(entry.credit_amount || 0), 0);
   }, [entries]);
 
   useEffect(() => {
@@ -63,9 +68,9 @@ export default function PortalPayPage() {
 
   const pageStyle: React.CSSProperties = {
     minHeight: "100vh",
-    background: "linear-gradient(180deg, #eaf7f7 0%, #f7fbfc 100%)",
-    color: "#12313a",
-    padding: "22px",
+    background: "#f4f8fb",
+    color: "#172033",
+    padding: isMobile ? "14px" : "24px",
   };
 
   const wrapStyle: React.CSSProperties = {
@@ -75,56 +80,30 @@ export default function PortalPayPage() {
 
   const cardStyle: React.CSSProperties = {
     background: "white",
-    border: "1px solid #cfe5e7",
-    borderRadius: 24,
-    boxShadow: "0 18px 38px rgba(16, 71, 84, 0.08)",
+    border: "1px solid #d9e4ec",
+    borderRadius: isMobile ? 14 : 18,
+    boxShadow: "0 10px 26px rgba(15, 47, 70, 0.06)",
   };
 
   const buttonStyle: React.CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 14,
-    padding: "12px 18px",
-    background: "linear-gradient(135deg, #0f8b8d, #0f6470)",
+    borderRadius: 10,
+    padding: isMobile ? "10px 12px" : "11px 16px",
+    background: "#2563eb",
     color: "white",
-    fontWeight: 900,
+    fontWeight: 800,
     border: 0,
     cursor: "pointer",
+    width: isMobile ? "100%" : undefined,
   };
 
   if (loading) {
     return (
       <main style={pageStyle}>
         <div style={wrapStyle}>
-          <section style={{ ...cardStyle, padding: 24 }}>Loading payment options...</section>
-        </div>
-      </main>
-    );
-  }
-
-  if (!email) {
-    return (
-      <main style={pageStyle}>
-        <div style={wrapStyle}>
-          <section style={{ ...cardStyle, padding: 28, maxWidth: 560, margin: "80px auto" }}>
-            <h1 style={{ margin: 0, fontSize: 34, letterSpacing: "-0.05em" }}>Sign in required</h1>
-            <p style={{ color: "#55727a" }}>Please sign in before making a payment.</p>
-            <a style={buttonStyle} href="/portal/login">Sign In</a>
-          </section>
-        </div>
-      </main>
-    );
-  }
-
-  if (!member) {
-    return (
-      <main style={pageStyle}>
-        <div style={wrapStyle}>
-          <section style={{ ...cardStyle, padding: 28, maxWidth: 620, margin: "80px auto" }}>
-            <h1 style={{ margin: 0, fontSize: 34, letterSpacing: "-0.05em" }}>Account not linked</h1>
-            <p style={{ color: "#55727a" }}>We could not find a member account matching {email}.</p>
-          </section>
+          <section style={{ ...cardStyle, padding: 22 }}>Loading payment options...</section>
         </div>
       </main>
     );
@@ -133,70 +112,72 @@ export default function PortalPayPage() {
   return (
     <main style={pageStyle}>
       <div style={wrapStyle}>
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, marginBottom: 22, flexWrap: "wrap" }}>
-          <a href="/portal" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 46, height: 46, borderRadius: 16, background: "linear-gradient(135deg, #0f8b8d, #0f6470)", color: "white", display: "grid", placeItems: "center", fontWeight: 900 }}>SP</div>
+        <header style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", gap: 12, marginBottom: 16, flexDirection: isMobile ? "column" : "row" }}>
+          <a href="/portal" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: "#2563eb", color: "white", display: "grid", placeItems: "center", fontWeight: 900 }}>SP</div>
             <div>
-              <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.04em" }}>Member Portal</div>
-              <div style={{ color: "#55727a", fontSize: 13, fontWeight: 700 }}>Payment options</div>
+              <div style={{ fontSize: 19, fontWeight: 900 }}>Member Portal</div>
+              <div style={{ color: "#64748b", fontSize: 13 }}>Payment options</div>
             </div>
           </a>
 
-          <a style={{ ...buttonStyle, background: "white", color: "#12313a", border: "1px solid #cfe5e7" }} href="/portal">
+          <a style={{ ...buttonStyle, background: "white", color: "#172033", border: "1px solid #d9e4ec" }} href="/portal">
             Back to Statement
           </a>
         </header>
 
-        <section style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 20, marginBottom: 20 }}>
-          <div style={{ ...cardStyle, padding: 28 }}>
-            <div style={{ color: "#0f8b8d", fontWeight: 900, textTransform: "uppercase", letterSpacing: ".08em" }}>Make a Payment</div>
-            <h1 style={{ margin: "8px 0 0", fontSize: 38, lineHeight: 1.05, letterSpacing: "-0.06em" }}>
-              Choose how you would like to pay
+        <section style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 300px", gap: 14, marginBottom: 16 }}>
+          <div style={{ ...cardStyle, padding: isMobile ? 18 : 26 }}>
+            <div style={{ color: "#2563eb", fontWeight: 900, fontSize: 12, letterSpacing: ".08em", textTransform: "uppercase" }}>Make a Payment</div>
+            <h1 style={{ margin: "6px 0 0", fontSize: isMobile ? 28 : 38, lineHeight: 1.08 }}>
+              Choose a payment method
             </h1>
-            <p style={{ color: "#55727a", marginTop: 14 }}>
-              Payments are processed securely by the selected provider. Your shul account will be updated after payment confirmation.
+            <p style={{ color: "#64748b", marginTop: 10 }}>
+              Payments are processed securely by the selected provider.
             </p>
 
-            <div style={{ marginTop: 22 }}>
-              <label style={{ display: "block", fontWeight: 900, marginBottom: 8 }}>Payment amount</label>
+            <div style={{ marginTop: 18 }}>
+              <label style={{ display: "block", fontWeight: 800, marginBottom: 8 }}>Payment amount</label>
               <input
                 value={amount}
                 onChange={(event) => setAmount(event.target.value)}
                 type="number"
                 step="0.01"
                 min="0.01"
-                style={{ width: "100%", maxWidth: 260, padding: "14px 16px", borderRadius: 14, border: "1px solid #cfe5e7", fontSize: 16 }}
+                style={{ width: "100%", padding: "13px 14px", borderRadius: 12, border: "1px solid #d9e4ec", fontSize: 16 }}
               />
             </div>
           </div>
 
-          <aside style={{ ...cardStyle, padding: 24 }}>
-            <div style={{ color: "#55727a", fontSize: 12, fontWeight: 900, textTransform: "uppercase", letterSpacing: ".06em" }}>Current Balance</div>
-            <strong style={{ display: "block", marginTop: 8, fontSize: 42, color: "#0f6470", lineHeight: 1, letterSpacing: "-0.06em" }}>
+          <aside style={{ ...cardStyle, padding: isMobile ? 18 : 22 }}>
+            <div style={{ color: "#64748b", fontSize: 12, fontWeight: 900, textTransform: "uppercase" }}>Current Balance</div>
+            <strong style={{ display: "block", marginTop: 6, fontSize: isMobile ? 30 : 38, color: "#1d4ed8" }}>
               {formatMoney(balance)}
             </strong>
-            <p style={{ color: "#55727a" }}>
-              Paying as {member.english_first_name} {member.english_surname}
-            </p>
+            {member && (
+              <p style={{ color: "#64748b" }}>
+                Paying as {member.english_first_name} {member.english_surname}
+              </p>
+            )}
           </aside>
         </section>
 
-        <section style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-          <div style={{ ...cardStyle, padding: 22 }}>
-            <h2 style={{ margin: 0 }}>Card Payment</h2>
-            <p style={{ color: "#55727a" }}>Pay securely by debit or credit card.</p>
+        <section style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 14 }}>
+          <div style={{ ...cardStyle, padding: 20 }}>
+            <h2 style={{ margin: 0, fontSize: 22 }}>Card Payment</h2>
+            <p style={{ color: "#64748b" }}>Pay securely by debit or credit card.</p>
             <button style={buttonStyle} type="button" onClick={() => alert("Stripe integration will be connected next.")}>Pay by Card</button>
           </div>
 
-          <div style={{ ...cardStyle, padding: 22 }}>
-            <h2 style={{ margin: 0 }}>AAC</h2>
-            <p style={{ color: "#55727a" }}>Continue to AAC to make your payment.</p>
+          <div style={{ ...cardStyle, padding: 20 }}>
+            <h2 style={{ margin: 0, fontSize: 22 }}>AAC</h2>
+            <p style={{ color: "#64748b" }}>Continue to AAC to make your payment.</p>
             <button style={buttonStyle} type="button" onClick={() => alert("AAC payment link will be connected next.")}>Pay with AAC</button>
           </div>
 
-          <div style={{ ...cardStyle, padding: 22 }}>
-            <h2 style={{ margin: 0 }}>Tevini</h2>
-            <p style={{ color: "#55727a" }}>Continue to Tevini to make your payment.</p>
+          <div style={{ ...cardStyle, padding: 20 }}>
+            <h2 style={{ margin: 0, fontSize: 22 }}>Tevini</h2>
+            <p style={{ color: "#64748b" }}>Continue to Tevini to make your payment.</p>
             <button style={buttonStyle} type="button" onClick={() => alert("Tevini payment link will be connected next.")}>Pay with Tevini</button>
           </div>
         </section>
