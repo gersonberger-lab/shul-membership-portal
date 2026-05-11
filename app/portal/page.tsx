@@ -12,25 +12,51 @@ function hebrewName(member: any) {
   return name || "חבר";
 }
 
+function hebrewDate(dateValue: string) {
+  if (!dateValue) return "";
+  try {
+    return new Intl.DateTimeFormat("he-IL-u-ca-hebrew", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(new Date(dateValue));
+  } catch {
+    return dateValue;
+  }
+}
+
+function hasHebrew(text: string) {
+  return /[\u0590-\u05FF]/.test(text);
+}
+
 function hebrewDescription(entry: any) {
-  const existingHebrew = entry.description_he || entry.hebrew_description || "";
-  if (existingHebrew) return existingHebrew;
+  const options = [
+    entry.description_he,
+    entry.hebrew_description,
+    entry.charge_description_he,
+    entry.charge_item_hebrew_name,
+    entry.charge_item_name_he,
+    entry.category_hebrew_name,
+    entry.description,
+  ];
+
+  for (const option of options) {
+    const value = String(option || "").trim();
+    if (value && hasHebrew(value)) return value;
+  }
 
   const text = String(entry.description || "").trim().toLowerCase();
   if (!text) return "";
-
   if (text.includes("opening balance")) return "יתרת פתיחה";
-  if (text.includes("stripe")) return "תשלום בכרטיס";
-  if (text.includes("card")) return "תשלום בכרטיס";
+  if (text.includes("stripe") || text.includes("card")) return "תשלום בכרטיס";
   if (text.includes("bank")) return "העברה בנקאית";
   if (text.includes("payment")) return "תשלום";
   if (text.includes("membership")) return "דמי חבר";
   if (text.includes("seat")) return "מקום ישיבה";
   if (text.includes("aliyah") || text.includes("aliyos")) return "עליה";
   if (text.includes("donation")) return "נדבה";
-  if (text.includes("charge")) return "חיוב";
 
-  return "חיוב";
+  return entry.description || "";
 }
 
 export default function MemberPortalPage() {
@@ -131,7 +157,6 @@ export default function MemberPortalPage() {
       <div style={wrap}>
         <header style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", gap: 12, marginBottom: 16, flexDirection: isMobile ? "column" : "row" }}>
           <a href="/portal" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: "#2563eb", color: "white", display: "grid", placeItems: "center", fontWeight: 800, flexShrink: 0, fontFamily: hebrewFont }}>שפ</div>
             <div>
               <div style={{ fontSize: 19, fontWeight: 800 }}>אזור אישי</div>
               <div style={{ color: "#64748b", fontSize: 13 }}>חשבון ותשלומים</div>
@@ -177,7 +202,7 @@ export default function MemberPortalPage() {
             <table style={{ width: "100%", minWidth: isMobile ? 540 : 620, borderCollapse: "collapse", background: "white", direction: "rtl" }}>
               <thead>
                 <tr style={{ background: "#f1f5f9", color: "#475569", fontSize: 12 }}>
-                  <th style={{ textAlign: "right", padding: isMobile ? 10 : 12 }}>תאריך</th>
+                  <th style={{ textAlign: "right", padding: isMobile ? 10 : 12 }}>תאריך עברי</th>
                   <th style={{ textAlign: "right", padding: isMobile ? 10 : 12 }}>תיאור</th>
                   <th style={{ textAlign: "left", padding: isMobile ? 10 : 12 }}>חיוב</th>
                   <th style={{ textAlign: "left", padding: isMobile ? 10 : 12 }}>תשלום</th>
@@ -186,7 +211,7 @@ export default function MemberPortalPage() {
               <tbody>
                 {entries.map((entry) => (
                   <tr key={entry.id} style={{ borderTop: "1px solid #e2e8f0" }}>
-                    <td style={{ padding: isMobile ? 10 : 12 }}>{entry.entry_date}</td>
+                    <td style={{ padding: isMobile ? 10 : 12 }}>{hebrewDate(entry.entry_date)}</td>
                     <td style={{ padding: isMobile ? 10 : 12 }}>{hebrewDescription(entry)}</td>
                     <td style={{ padding: isMobile ? 10 : 12, textAlign: "left", color: "#b45309", fontWeight: 800 }}>{entry.debit_amount ? money(Number(entry.debit_amount)) : ""}</td>
                     <td style={{ padding: isMobile ? 10 : 12, textAlign: "left", color: "#047857", fontWeight: 800 }}>{entry.credit_amount ? money(Number(entry.credit_amount)) : ""}</td>
