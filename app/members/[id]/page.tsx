@@ -3,6 +3,21 @@ import { supabase } from "../../../lib/supabase";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+function hebrewName(member: any) {
+  return `${member?.hebrew_first_name || ""} ${member?.hebrew_surname || ""}`.trim() || "-";
+}
+
+function description(entry: any) {
+  return (
+    entry.description_he ||
+    entry.hebrew_description ||
+    entry.charge_description_he ||
+    entry.charge_item_hebrew_name ||
+    entry.description ||
+    ""
+  );
+}
+
 export default async function MemberAccountPage({
   params,
 }: {
@@ -23,12 +38,8 @@ export default async function MemberAccountPage({
     .order("entry_date", { ascending: true })
     .order("created_at", { ascending: true });
 
-  const totalCharges =
-    ledgerEntries?.reduce((sum, e) => sum + Number(e.debit_amount || 0), 0) || 0;
-
-  const totalPayments =
-    ledgerEntries?.reduce((sum, e) => sum + Number(e.credit_amount || 0), 0) || 0;
-
+  const totalCharges = ledgerEntries?.reduce((sum, e) => sum + Number(e.debit_amount || 0), 0) || 0;
+  const totalPayments = ledgerEntries?.reduce((sum, e) => sum + Number(e.credit_amount || 0), 0) || 0;
   const balance = totalCharges - totalPayments;
 
   return (
@@ -36,22 +47,8 @@ export default async function MemberAccountPage({
       <section className="hero">
         <div style={{ display: "flex", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}>
           <div>
-            <h1 style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "baseline" }}>
-              <span>
-                {member?.english_first_name} {member?.english_surname}
-              </span>
-
-              <span
-                dir="rtl"
-                style={{
-                  fontSize: "0.9em",
-                  fontWeight: 800,
-                  color: "#7a5a22",
-                }}
-              >
-                {member?.hebrew_first_name} {member?.hebrew_surname}
-              </span>
-            </h1>
+            <h1 dir="rtl" style={{ marginBottom: 4 }}>{hebrewName(member)}</h1>
+            <p className="muted">Member account and statement.</p>
           </div>
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-start" }}>
@@ -74,6 +71,14 @@ export default async function MemberAccountPage({
 
           <div className="detail-list">
             <div>
+              <span>Hebrew Name</span>
+              <strong dir="rtl">{hebrewName(member)}</strong>
+            </div>
+            <div>
+              <span>Father’s Hebrew Name</span>
+              <strong dir="rtl">{member?.fathers_hebrew_first_name || "-"}</strong>
+            </div>
+            <div>
               <span>Email</span>
               <strong>{member?.email || "-"}</strong>
             </div>
@@ -84,14 +89,6 @@ export default async function MemberAccountPage({
             <div>
               <span>Status</span>
               <strong>{member?.status || "-"}</strong>
-            </div>
-            <div>
-              <span>Preferred Language</span>
-              <strong>{member?.preferred_language || "-"}</strong>
-            </div>
-            <div>
-              <span>Father’s Hebrew Name</span>
-              <strong dir="rtl">{member?.fathers_hebrew_first_name || "-"}</strong>
             </div>
             <div>
               <span>Address</span>
@@ -153,7 +150,7 @@ export default async function MemberAccountPage({
                 return (
                   <tr key={entry.id}>
                     <td>{entry.entry_date}</td>
-                    <td>{entry.description}</td>
+                    <td dir="rtl">{description(entry)}</td>
                     <td>{debit > 0 ? `£${debit.toFixed(2)}` : ""}</td>
                     <td>{credit > 0 ? `£${credit.toFixed(2)}` : ""}</td>
                     <td>
