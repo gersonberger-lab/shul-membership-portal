@@ -8,8 +8,6 @@ export default function NewMemberPage() {
   const router = useRouter();
 
   const [form, setForm] = useState({
-    english_first_name: "",
-    english_surname: "",
     hebrew_first_name: "",
     hebrew_surname: "",
     fathers_hebrew_first_name: "",
@@ -23,9 +21,16 @@ export default function NewMemberPage() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
+    if (!form.hebrew_first_name.trim() || !form.hebrew_surname.trim()) {
+      alert("Please enter Hebrew first name and surname.");
+      return;
+    }
+
     const { error } = await supabase.from("members").insert([
       {
         ...form,
+        english_first_name: form.hebrew_first_name.trim(),
+        english_surname: form.hebrew_surname.trim(),
         status: "active",
       },
     ]);
@@ -41,33 +46,24 @@ export default function NewMemberPage() {
     <>
       <section className="hero">
         <h1>Add Member</h1>
+        <p>Enter the member name in Hebrew only.</p>
       </section>
 
       <section className="card form-card">
         <form className="form-grid" onSubmit={handleSubmit}>
           <div className="form-field">
-            <label>English first name</label>
-            <input name="english_first_name" onChange={handleChange} />
+            <label>Hebrew first name *</label>
+            <input name="hebrew_first_name" dir="rtl" lang="he" onChange={handleChange} required />
           </div>
 
           <div className="form-field">
-            <label>English surname</label>
-            <input name="english_surname" onChange={handleChange} />
-          </div>
-
-          <div className="form-field">
-            <label>Hebrew first name</label>
-            <input name="hebrew_first_name" dir="rtl" onChange={handleChange} />
-          </div>
-
-          <div className="form-field">
-            <label>Hebrew surname</label>
-            <input name="hebrew_surname" dir="rtl" onChange={handleChange} />
+            <label>Hebrew surname *</label>
+            <input name="hebrew_surname" dir="rtl" lang="he" onChange={handleChange} required />
           </div>
 
           <div className="form-field">
             <label>Father’s Hebrew name</label>
-            <input name="fathers_hebrew_first_name" dir="rtl" onChange={handleChange} />
+            <input name="fathers_hebrew_first_name" dir="rtl" lang="he" onChange={handleChange} />
           </div>
 
           <div className="form-field">
