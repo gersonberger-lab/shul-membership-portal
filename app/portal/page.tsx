@@ -13,7 +13,24 @@ function hebrewName(member: any) {
 }
 
 function hebrewDescription(entry: any) {
-  return entry.description_he || entry.hebrew_description || entry.description || "";
+  const existingHebrew = entry.description_he || entry.hebrew_description || "";
+  if (existingHebrew) return existingHebrew;
+
+  const text = String(entry.description || "").trim().toLowerCase();
+  if (!text) return "";
+
+  if (text.includes("opening balance")) return "יתרת פתיחה";
+  if (text.includes("stripe")) return "תשלום בכרטיס";
+  if (text.includes("card")) return "תשלום בכרטיס";
+  if (text.includes("bank")) return "העברה בנקאית";
+  if (text.includes("payment")) return "תשלום";
+  if (text.includes("membership")) return "דמי חבר";
+  if (text.includes("seat")) return "מקום ישיבה";
+  if (text.includes("aliyah") || text.includes("aliyos")) return "עליה";
+  if (text.includes("donation")) return "נדבה";
+  if (text.includes("charge")) return "חיוב";
+
+  return "חיוב";
 }
 
 export default function MemberPortalPage() {
@@ -72,10 +89,11 @@ export default function MemberPortalPage() {
     return { charges, payments, balance: charges - payments };
   }, [entries]);
 
-  const page: React.CSSProperties = { minHeight: "100vh", background: "#f4f8fb", padding: isMobile ? "14px" : "24px", color: "#172033", direction: "rtl" };
+  const hebrewFont = "Arial, 'Noto Sans Hebrew', 'Segoe UI', sans-serif";
+  const page: React.CSSProperties = { minHeight: "100vh", background: "#f4f8fb", padding: isMobile ? "14px" : "24px", color: "#172033", direction: "rtl", fontFamily: hebrewFont };
   const wrap: React.CSSProperties = { maxWidth: 1080, margin: "0 auto" };
   const panel: React.CSSProperties = { background: "white", border: "1px solid #d9e4ec", borderRadius: isMobile ? 14 : 18, boxShadow: "0 10px 26px rgba(15, 47, 70, 0.06)" };
-  const primary: React.CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", padding: isMobile ? "10px 12px" : "11px 16px", borderRadius: 10, background: "#2563eb", color: "white", fontWeight: 800, width: isMobile ? "100%" : undefined };
+  const primary: React.CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", padding: isMobile ? "10px 12px" : "11px 18px", borderRadius: 12, background: "#2563eb", color: "white", fontWeight: 700, fontSize: 16, fontFamily: hebrewFont, width: isMobile ? "100%" : undefined };
 
   if (loading) {
     return <main style={page}><div style={wrap}><section style={{ ...panel, padding: 22 }}>טוען את החשבון...</section></div></main>;
@@ -113,9 +131,9 @@ export default function MemberPortalPage() {
       <div style={wrap}>
         <header style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", gap: 12, marginBottom: 16, flexDirection: isMobile ? "column" : "row" }}>
           <a href="/portal" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: "#2563eb", color: "white", display: "grid", placeItems: "center", fontWeight: 900, flexShrink: 0 }}>שפ</div>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: "#2563eb", color: "white", display: "grid", placeItems: "center", fontWeight: 800, flexShrink: 0, fontFamily: hebrewFont }}>שפ</div>
             <div>
-              <div style={{ fontSize: 19, fontWeight: 900 }}>אזור אישי</div>
+              <div style={{ fontSize: 19, fontWeight: 800 }}>אזור אישי</div>
               <div style={{ color: "#64748b", fontSize: 13 }}>חשבון ותשלומים</div>
             </div>
           </a>
@@ -128,22 +146,22 @@ export default function MemberPortalPage() {
         <section style={{ ...panel, padding: isMobile ? 18 : 26, marginBottom: 14 }}>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 240px", gap: isMobile ? 14 : 20, alignItems: "start" }}>
             <div>
-              <div style={{ color: "#2563eb", fontWeight: 900, fontSize: 12, letterSpacing: ".08em" }}>החשבון שלך</div>
-              <h1 style={{ margin: "6px 0 0", fontSize: isMobile ? 29 : 36, lineHeight: 1.1 }}>
+              <div style={{ color: "#2563eb", fontWeight: 800, fontSize: 12, letterSpacing: ".03em" }}>החשבון שלך</div>
+              <h1 style={{ margin: "6px 0 0", fontSize: isMobile ? 29 : 36, lineHeight: 1.1, fontWeight: 800 }}>
                 {hebrewName(member)}
               </h1>
             </div>
             <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 14, padding: 16 }}>
-              <div style={{ color: "#64748b", fontSize: 12, fontWeight: 900 }}>יתרה נוכחית</div>
+              <div style={{ color: "#64748b", fontSize: 12, fontWeight: 800 }}>יתרה נוכחית</div>
               <strong style={{ display: "block", marginTop: 5, fontSize: isMobile ? 30 : 34, color: "#1d4ed8" }}>{money(totals.balance)}</strong>
             </div>
           </div>
         </section>
 
         <section style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 12, marginBottom: 14 }}>
-          <div style={{ ...panel, padding: 16 }}><div style={{ color: "#64748b", fontSize: 12, fontWeight: 900 }}>סה״כ חיובים</div><strong style={{ fontSize: 21 }}>{money(totals.charges)}</strong></div>
-          <div style={{ ...panel, padding: 16 }}><div style={{ color: "#64748b", fontSize: 12, fontWeight: 900 }}>סה״כ תשלומים</div><strong style={{ fontSize: 21 }}>{money(totals.payments)}</strong></div>
-          <div style={{ ...panel, padding: 16 }}><div style={{ color: "#64748b", fontSize: 12, fontWeight: 900 }}>מספר שורות</div><strong style={{ fontSize: 21 }}>{entries.length}</strong></div>
+          <div style={{ ...panel, padding: 16 }}><div style={{ color: "#64748b", fontSize: 12, fontWeight: 800 }}>סה״כ חיובים</div><strong style={{ fontSize: 21 }}>{money(totals.charges)}</strong></div>
+          <div style={{ ...panel, padding: 16 }}><div style={{ color: "#64748b", fontSize: 12, fontWeight: 800 }}>סה״כ תשלומים</div><strong style={{ fontSize: 21 }}>{money(totals.payments)}</strong></div>
+          <div style={{ ...panel, padding: 16 }}><div style={{ color: "#64748b", fontSize: 12, fontWeight: 800 }}>מספר שורות</div><strong style={{ fontSize: 21 }}>{entries.length}</strong></div>
         </section>
 
         <section style={{ ...panel, padding: isMobile ? 16 : 22 }}>
