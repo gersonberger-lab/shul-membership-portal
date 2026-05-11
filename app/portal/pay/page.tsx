@@ -73,18 +73,13 @@ export default function PortalPayPage() {
     padding: isMobile ? "14px" : "24px",
   };
 
-  const wrapStyle: React.CSSProperties = {
-    maxWidth: 980,
-    margin: "0 auto",
-  };
-
+  const wrapStyle: React.CSSProperties = { maxWidth: 980, margin: "0 auto" };
   const cardStyle: React.CSSProperties = {
     background: "white",
     border: "1px solid #d9e4ec",
     borderRadius: isMobile ? 14 : 18,
     boxShadow: "0 10px 26px rgba(15, 47, 70, 0.06)",
   };
-
   const buttonStyle: React.CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
@@ -128,12 +123,12 @@ export default function PortalPayPage() {
 
         <section style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 300px", gap: 14, marginBottom: 16 }}>
           <div style={{ ...cardStyle, padding: isMobile ? 18 : 26 }}>
-            <div style={{ color: "#2563eb", fontWeight: 900, fontSize: 12, letterSpacing: ".08em", textTransform: "uppercase" }}>Make a Payment</div>
+            <div style={{ color: "#2563eb", fontWeight: 900, fontSize: 12, letterSpacing: ".08em", textTransform: "uppercase" }}>Pay Your Charges</div>
             <h1 style={{ margin: "6px 0 0", fontSize: isMobile ? 28 : 38, lineHeight: 1.08 }}>
-              Choose a payment method
+              Choose how to pay
             </h1>
             <p style={{ color: "#64748b", marginTop: 10 }}>
-              Payments are processed securely by the selected provider.
+              Pay online by card, or use the bank transfer details below.
             </p>
 
             <div style={{ marginTop: 18 }}>
@@ -162,23 +157,26 @@ export default function PortalPayPage() {
           </aside>
         </section>
 
-        <section style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 14 }}>
+        <section style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 14 }}>
           <div style={{ ...cardStyle, padding: 20 }}>
-            <h2 style={{ margin: 0, fontSize: 22 }}>Card Payment</h2>
-            <p style={{ color: "#64748b" }}>Pay securely by debit or credit card.</p>
+            <h2 style={{ margin: 0, fontSize: 22 }}>Pay by Card</h2>
+            <p style={{ color: "#64748b" }}>Pay securely by debit or credit card using Stripe.</p>
             <button style={buttonStyle} type="button" onClick={() => alert("Stripe integration will be connected next.")}>Pay by Card</button>
           </div>
 
           <div style={{ ...cardStyle, padding: 20 }}>
-            <h2 style={{ margin: 0, fontSize: 22 }}>AAC</h2>
-            <p style={{ color: "#64748b" }}>Continue to AAC to make your payment.</p>
-            <button style={buttonStyle} type="button" onClick={() => alert("AAC payment link will be connected next.")}>Pay with AAC</button>
-          </div>
-
-          <div style={{ ...cardStyle, padding: 20 }}>
-            <h2 style={{ margin: 0, fontSize: 22 }}>Tevini</h2>
-            <p style={{ color: "#64748b" }}>Continue to Tevini to make your payment.</p>
-            <button style={buttonStyle} type="button" onClick={() => alert("Tevini payment link will be connected next.")}>Pay with Tevini</button>
+            <h2 style={{ margin: 0, fontSize: 22 }}>Bank Transfer</h2>
+            <p style={{ color: "#64748b" }}>Use these details if you prefer to pay by bank transfer.</p>
+            <div style={{ display: "grid", gap: 8, marginTop: 14 }}>
+              <div><strong>Account name:</strong> To be added in Settings</div>
+              <div><strong>Bank:</strong> To be added in Settings</div>
+              <div><strong>Sort code:</strong> To be added</div>
+              <div><strong>Account number:</strong> To be added</div>
+              <div><strong>Reference:</strong> Please use your name as the payment reference.</div>
+            </div>
+            <p style={{ color: "#64748b", marginTop: 14 }}>
+              Bank transfers will be matched to your account once received.
+            </p>
           </div>
         </section>
       </div>
