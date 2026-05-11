@@ -14,6 +14,7 @@ export default function PortalPayPage() {
   const [email, setEmail] = useState<string | null>(null);
   const [amount, setAmount] = useState("");
   const [isMobile, setIsMobile] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 760);
@@ -65,6 +66,38 @@ export default function PortalPayPage() {
       setAmount(balance.toFixed(2));
     }
   }, [balance, amount]);
+
+  async function payByCard() {
+    const paymentAmount = Number(amount || 0);
+
+    if (!paymentAmount || paymentAmount <= 0) {
+      alert("Please enter a valid payment amount.");
+      return;
+    }
+
+    setRedirecting(true);
+
+    const response = await fetch("/api/stripe/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amount: paymentAmount,
+        memberId: member?.id || "",
+        memberName: member ? `${member.english_first_name} ${member.english_surname}` : "Member",
+        memberEmail: email || "",
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.url) {
+      setRedirecting(false);
+      alert(data.error || "Could not start card payment.");
+      return;
+    }
+
+    window.location.href = data.url;
+  }
 
   const pageStyle: React.CSSProperties = {
     minHeight: "100vh",
@@ -161,7 +194,9 @@ export default function PortalPayPage() {
           <div style={{ ...cardStyle, padding: 20 }}>
             <h2 style={{ margin: 0, fontSize: 22 }}>Pay by Card</h2>
             <p style={{ color: "#64748b" }}>Pay securely by debit or credit card using Stripe.</p>
-            <button style={buttonStyle} type="button" onClick={() => alert("Stripe integration will be connected next.")}>Pay by Card</button>
+            <button style={buttonStyle} type="button" onClick={payByCard} disabled={redirecting}>
+              {redirecting ? "Opening Stripe..." : "Pay by Card"}
+            </button>
           </div>
 
           <div style={{ ...cardStyle, padding: 20 }}>
