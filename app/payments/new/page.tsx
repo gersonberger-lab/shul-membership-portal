@@ -6,27 +6,15 @@ import { supabase } from "../../../lib/supabase";
 
 type Member = {
   id: string;
-  english_first_name: string;
-  english_surname: string;
   hebrew_first_name: string | null;
   hebrew_surname: string | null;
   email: string | null;
 };
 
-const paymentMethods = [
-  "Cash",
-  "Cheque",
-  "Bank Transfer",
-  "Card",
-  "Direct Debit",
-  "Standing Order",
-  "AAC Voucher",
-  "Tevini Voucher",
-  "Other Charity Voucher",
-];
+const paymentMethods = ["מזומן", "שיק", "העברה בנקאית", "כרטיס", "הוראת קבע", "אחר"];
 
 function memberDisplayName(member: Member) {
-  return `${member.english_first_name} ${member.english_surname}`.trim();
+  return `${member.hebrew_first_name || ""} ${member.hebrew_surname || ""}`.trim() || member.email || "-";
 }
 
 export default function NewPaymentPage() {
@@ -55,14 +43,13 @@ export default function NewPaymentPage() {
     async function loadMembers() {
       const { data } = await supabase
         .from("members")
-        .select("id, english_first_name, english_surname, hebrew_first_name, hebrew_surname, email")
-        .order("english_surname");
+        .select("id, hebrew_first_name, hebrew_surname, email")
+        .order("hebrew_surname");
 
       setMembers(data || []);
 
       if (presetMemberId && data) {
         const presetMember = data.find((member) => member.id === presetMemberId);
-
         if (presetMember) {
           setMemberSearch(memberDisplayName(presetMember));
           setForm((prev) => ({ ...prev, member_id: presetMember.id }));
@@ -74,20 +61,11 @@ export default function NewPaymentPage() {
   }, [presetMemberId]);
 
   const filteredMembers = useMemo(() => {
-    const q = memberSearch.trim().toLowerCase();
-
+    const q = memberSearch.trim();
     return members
       .filter((member) => {
-        const englishName = memberDisplayName(member).toLowerCase();
-        const hebrewName = `${member.hebrew_first_name || ""} ${member.hebrew_surname || ""}`;
-
         if (!q) return true;
-
-        return (
-          englishName.includes(q) ||
-          hebrewName.includes(memberSearch.trim()) ||
-          (member.email || "").toLowerCase().includes(q)
-        );
+        return memberDisplayName(member).includes(q) || (member.email || "").toLowerCase().includes(q.toLowerCase());
       })
       .slice(0, 8);
   }, [memberSearch, members]);
@@ -95,11 +73,7 @@ export default function NewPaymentPage() {
   const selectedMember = members.find((member) => member.id === form.member_id);
   const amountNumber = Number(form.amount || 0);
 
-  const description = [
-    "Payment received",
-    form.payment_method ? form.payment_method : "",
-    form.reference ? `Ref: ${form.reference}` : "",
-  ]
+  const description = ["תשלום", form.payment_method || "", form.reference ? `אסמכתא: ${form.reference}` : ""]
     .filter(Boolean)
     .join(" - ");
 
@@ -130,6 +104,7 @@ export default function NewPaymentPage() {
         entry_date: form.entry_date,
         entry_type: "payment",
         description,
+        description_he: description,
         debit_amount: 0,
         credit_amount: amountNumber,
         status: "posted",
@@ -161,7 +136,8 @@ export default function NewPaymentPage() {
               <label>Member *</label>
               <input
                 value={memberSearch}
-                placeholder="Start typing member name, Hebrew name, or email"
+                dir="rtl"
+                placeholder="Start typing Hebrew member name"
                 onFocus={() => setActiveSearch(true)}
                 onChange={(e) => {
                   setMemberSearch(e.target.value);
@@ -174,16 +150,9 @@ export default function NewPaymentPage() {
               {activeSearch && (
                 <div className="search-results">
                   {filteredMembers.map((member) => (
-                    <button
-                      key={member.id}
-                      type="button"
-                      className="search-result"
-                      onMouseDown={() => selectMember(member)}
-                    >
-                      <strong>{memberDisplayName(member)}</strong>
-                      <span dir="rtl">
-                        {member.hebrew_first_name} {member.hebrew_surname}
-                      </span>
+                    <button key={member.id} type="button" className="search-result" onMouseDown={() => selectMember(member)}>
+                      <strong dir="rtl">{memberDisplayName(member)}</strong>
+                      <span>{member.email || ""}</span>
                     </button>
                   ))}
                 </div>
@@ -193,54 +162,27 @@ export default function NewPaymentPage() {
             <div className="payment-grid">
               <div className="form-field">
                 <label>Amount *</label>
-                <input
-                  name="amount"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  value={form.amount}
-                  onChange={handleChange}
-                  placeholder="0.00"
-                  required
-                />
+                <input name="amount" type="number" step="0.01" min="0.01" value={form.amount} onChange={handleChange} placeholder="0.00" required />
               </div>
 
               <div className="form-field">
                 <label>Date *</label>
-                <input
-                  name="entry_date"
-                  type="date"
-                  value={form.entry_date}
-                  onChange={handleChange}
-                  required
-                />
+                <input name="entry_date" type="date" value={form.entry_date} onChange={handleChange} required />
               </div>
 
               <div className="form-field">
                 <label>Method *</label>
-                <select
-                  name="payment_method"
-                  value={form.payment_method}
-                  onChange={handleChange}
-                  required
-                >
+                <select name="payment_method" value={form.payment_method} onChange={handleChange} required>
                   <option value="">Select...</option>
                   {paymentMethods.map((method) => (
-                    <option key={method} value={method}>
-                      {method}
-                    </option>
+                    <option key={method} value={method}>{method}</option>
                   ))}
                 </select>
               </div>
 
               <div className="form-field">
                 <label>Reference</label>
-                <input
-                  name="reference"
-                  value={form.reference}
-                  onChange={handleChange}
-                  placeholder="Cheque / voucher / bank ref"
-                />
+                <input name="reference" value={form.reference} onChange={handleChange} placeholder="Cheque / bank ref" />
               </div>
             </div>
           </div>
@@ -251,26 +193,16 @@ export default function NewPaymentPage() {
 
             {selectedMember && (
               <div className="payment-member-pill">
-                <b>{memberDisplayName(selectedMember)}</b>
-                {(selectedMember.hebrew_first_name || selectedMember.hebrew_surname) && (
-                  <small dir="rtl">
-                    {selectedMember.hebrew_first_name} {selectedMember.hebrew_surname}
-                  </small>
-                )}
+                <b dir="rtl">{memberDisplayName(selectedMember)}</b>
               </div>
             )}
 
-            <div className="payment-description-preview">
-              {description || "Payment received"}
+            <div className="payment-description-preview" dir="rtl">
+              {description || "תשלום"}
             </div>
 
-            <button type="submit" disabled={saving}>
-              {saving ? "Posting..." : "Post Payment"}
-            </button>
-
-            <a className="button secondary" href="/members">
-              Cancel
-            </a>
+            <button type="submit" disabled={saving}>{saving ? "Posting..." : "Post Payment"}</button>
+            <a className="button secondary" href="/members">Cancel</a>
           </aside>
         </form>
       </section>
