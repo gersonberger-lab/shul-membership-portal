@@ -18,6 +18,11 @@ export default function SettingsPage() {
           <p className="muted">Manage cash, bank transfer, card and voucher payment methods.</p>
         </a>
 
+        <a className="card settings-card" href="/settings/bank-details">
+          <h3 className="section-title">Bank Details</h3>
+          <p className="muted">Manage the bank transfer details shown to members in the payment portal.</p>
+        </a>
+
         <a className="card settings-card" href="/settings/communications">
           <h3 className="section-title">Communications</h3>
           <p className="muted">Prepare statement emails, reminders, receipts and member notifications.</p>
