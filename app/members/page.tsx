@@ -6,16 +6,19 @@ import { supabase } from "../../lib/supabase";
 type Member = {
   id: string;
   member_number: number;
-  english_first_name: string;
-  english_surname: string;
   hebrew_first_name: string | null;
   hebrew_surname: string | null;
   email: string | null;
+  phone?: string | null;
   ledger_entries?: {
     debit_amount: number | null;
     credit_amount: number | null;
   }[];
 };
+
+function hebrewName(member: Member) {
+  return `${member.hebrew_first_name || ""} ${member.hebrew_surname || ""}`.trim() || "-";
+}
 
 export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -28,11 +31,10 @@ export default function MembersPage() {
         .select(`
           id,
           member_number,
-          english_first_name,
-          english_surname,
           hebrew_first_name,
           hebrew_surname,
           email,
+          phone,
           ledger_entries (
             debit_amount,
             credit_amount
@@ -53,18 +55,13 @@ export default function MembersPage() {
 
   const filteredMembers = useMemo(() => {
     const q = search.trim().toLowerCase();
+    const raw = search.trim();
 
     if (!q) return members;
 
-    return members.filter((m) => {
-      const englishName = `${m.english_first_name} ${m.english_surname}`.toLowerCase();
-      const hebrewName = `${m.hebrew_first_name || ""} ${m.hebrew_surname || ""}`;
-
-      return (
-        englishName.includes(q) ||
-        hebrewName.includes(search.trim()) ||
-        (m.email || "").toLowerCase().includes(q)
-      );
+    return members.filter((member) => {
+      const name = hebrewName(member);
+      return name.includes(raw) || (member.email || "").toLowerCase().includes(q) || (member.phone || "").includes(raw);
     });
   }, [search, members]);
 
@@ -72,7 +69,7 @@ export default function MembersPage() {
     <>
       <section className="hero">
         <h1>Members</h1>
-        <p>Search and manage member accounts.</p>
+        <p>Search and manage member accounts using Hebrew names.</p>
 
         <div style={{ marginTop: 20 }}>
           <a className="button" href="/members/new">Add Member</a>
@@ -85,7 +82,7 @@ export default function MembersPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Type name, Hebrew name, or email..."
+            placeholder="Type Hebrew name, email, or phone..."
           />
         </div>
       </section>
@@ -94,37 +91,28 @@ export default function MembersPage() {
         <table className="table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Hebrew</th>
+              <th>Hebrew Name</th>
               <th>Email</th>
+              <th>Phone</th>
               <th>Balance</th>
             </tr>
           </thead>
 
           <tbody>
-            {filteredMembers.map((m) => {
-              const balance =
-                m.ledger_entries?.reduce((sum, entry) => {
-                  return (
-                    sum +
-                    Number(entry.debit_amount || 0) -
-                    Number(entry.credit_amount || 0)
-                  );
-                }, 0) || 0;
+            {filteredMembers.map((member) => {
+              const balance = member.ledger_entries?.reduce((sum, entry) => {
+                return sum + Number(entry.debit_amount || 0) - Number(entry.credit_amount || 0);
+              }, 0) || 0;
 
               return (
-                <tr key={m.id}>
-                  <td>
-                    <a href={`/members/${m.id}`}>
-                      <strong>
-                        {m.english_first_name} {m.english_surname}
-                      </strong>
+                <tr key={member.id}>
+                  <td dir="rtl">
+                    <a href={`/members/${member.id}`}>
+                      <strong>{hebrewName(member)}</strong>
                     </a>
                   </td>
-                  <td dir="rtl">
-                    {m.hebrew_first_name} {m.hebrew_surname}
-                  </td>
-                  <td>{m.email || "-"}</td>
+                  <td>{member.email || "-"}</td>
+                  <td>{member.phone || "-"}</td>
                   <td className="balance">£{balance.toFixed(2)}</td>
                 </tr>
               );
