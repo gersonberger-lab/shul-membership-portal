@@ -12,15 +12,12 @@ export default function EditMemberPage() {
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
-    english_first_name: "",
-    english_surname: "",
     hebrew_first_name: "",
     hebrew_surname: "",
     fathers_hebrew_first_name: "",
     address: "",
     phone: "",
     email: "",
-    preferred_language: "english",
     status: "active",
     notes: "",
   });
@@ -39,15 +36,12 @@ export default function EditMemberPage() {
       }
 
       setForm({
-        english_first_name: data.english_first_name || "",
-        english_surname: data.english_surname || "",
         hebrew_first_name: data.hebrew_first_name || "",
         hebrew_surname: data.hebrew_surname || "",
         fathers_hebrew_first_name: data.fathers_hebrew_first_name || "",
         address: data.address || "",
         phone: data.phone || "",
         email: data.email || "",
-        preferred_language: data.preferred_language || "english",
         status: data.status || "active",
         notes: data.notes || "",
       });
@@ -63,8 +57,8 @@ export default function EditMemberPage() {
   const handleSave = async (e: any) => {
     e.preventDefault();
 
-    if (!form.english_first_name.trim() || !form.english_surname.trim()) {
-      alert("Please enter English first name and surname.");
+    if (!form.hebrew_first_name.trim() || !form.hebrew_surname.trim()) {
+      alert("Please enter Hebrew first name and surname.");
       return;
     }
 
@@ -74,8 +68,8 @@ export default function EditMemberPage() {
       .from("members")
       .update({
         ...form,
-        english_first_name: form.english_first_name.trim(),
-        english_surname: form.english_surname.trim(),
+        english_first_name: form.hebrew_first_name.trim(),
+        english_surname: form.hebrew_surname.trim(),
         email: form.email.trim() || null,
         updated_at: new Date().toISOString(),
       })
@@ -94,33 +88,23 @@ export default function EditMemberPage() {
     <>
       <section className="hero">
         <h1>Edit Member</h1>
-        <p>Update member personal and Hebrew details.</p>
+        <p>Update Hebrew member details.</p>
       </section>
 
       <section className="card form-card">
         <form className="form-grid" onSubmit={handleSave}>
           <div className="form-field">
-            <label>English first name *</label>
-            <input name="english_first_name" value={form.english_first_name} onChange={handleChange} required />
+            <label>Hebrew first name *</label>
+            <input name="hebrew_first_name" value={form.hebrew_first_name} dir="rtl" lang="he" onChange={handleChange} required />
           </div>
 
           <div className="form-field">
-            <label>English surname *</label>
-            <input name="english_surname" value={form.english_surname} onChange={handleChange} required />
+            <label>Hebrew surname *</label>
+            <input name="hebrew_surname" value={form.hebrew_surname} dir="rtl" lang="he" onChange={handleChange} required />
           </div>
 
           <div className="form-field">
-            <label>Hebrew first name</label>
-            <input name="hebrew_first_name" value={form.hebrew_first_name} dir="rtl" lang="he" onChange={handleChange} />
-          </div>
-
-          <div className="form-field">
-            <label>Hebrew surname</label>
-            <input name="hebrew_surname" value={form.hebrew_surname} dir="rtl" lang="he" onChange={handleChange} />
-          </div>
-
-          <div className="form-field">
-            <label>Father’s Hebrew first name</label>
+            <label>Father’s Hebrew name</label>
             <input name="fathers_hebrew_first_name" value={form.fathers_hebrew_first_name} dir="rtl" lang="he" onChange={handleChange} />
           </div>
 
@@ -132,14 +116,6 @@ export default function EditMemberPage() {
           <div className="form-field">
             <label>Email</label>
             <input name="email" type="email" value={form.email} onChange={handleChange} />
-          </div>
-
-          <div className="form-field">
-            <label>Preferred language</label>
-            <select name="preferred_language" value={form.preferred_language} onChange={handleChange}>
-              <option value="english">English</option>
-              <option value="hebrew">Hebrew</option>
-            </select>
           </div>
 
           <div className="form-field">
