@@ -18,6 +18,11 @@ export default function SettingsPage() {
           <p className="muted">Manage cash, bank transfer, card and voucher payment methods.</p>
         </a>
 
+        <a className="card settings-card" href="/settings/communications">
+          <h3 className="section-title">Communications</h3>
+          <p className="muted">Prepare statement emails, reminders, receipts and member notifications.</p>
+        </a>
+
         <a className="card settings-card" href="/diary">
           <h3 className="section-title">Diary & Yahrzeits</h3>
           <p className="muted">Set up Hebrew-date diary records and reminders.</p>
