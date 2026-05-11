@@ -1,19 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "../../../lib/supabase";
+
+const defaultDetails = {
+  accountName: "",
+  bankName: "",
+  sortCode: "",
+  accountNumber: "",
+  referenceText: "נא לציין את שמכם כאסמכתא לתשלום.",
+  note: "תשלומים בהעברה בנקאית יעודכנו בחשבון לאחר התאמה במשרד.",
+};
 
 export default function BankDetailsSettingsPage() {
-  const [details, setDetails] = useState({
-    accountName: "",
-    bankName: "",
-    sortCode: "",
-    accountNumber: "",
-    referenceText: "Please use your name as the payment reference.",
-    note: "Bank transfer payments may take a little time to appear on your account.",
-  });
+  const [details, setDetails] = useState(defaultDetails);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    async function loadDetails() {
+      const { data } = await supabase
+        .from("app_settings")
+        .select("value")
+        .eq("key", "bank_details")
+        .maybeSingle();
+
+      if (data?.value) {
+        setDetails({ ...defaultDetails, ...(data.value as any) });
+      }
+    }
+
+    loadDetails();
+  }, []);
 
   function update(field: string, value: string) {
     setDetails((current) => ({ ...current, [field]: value }));
+  }
+
+  async function saveDetails() {
+    setSaving(true);
+    setMessage("");
+
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert({ key: "bank_details", value: details }, { onConflict: "key" });
+
+    setSaving(false);
+
+    if (error) {
+      setMessage("Could not save. Please make sure the app_settings table exists.");
+      return;
+    }
+
+    setMessage("Bank details saved.");
   }
 
   return (
@@ -48,18 +87,32 @@ export default function BankDetailsSettingsPage() {
 
           <div className="form-field full">
             <label>Payment reference instruction</label>
-            <input value={details.referenceText} onChange={(event) => update("referenceText", event.target.value)} />
+            <input dir="rtl" value={details.referenceText} onChange={(event) => update("referenceText", event.target.value)} />
           </div>
 
           <div className="form-field full">
             <label>Extra note shown to members</label>
-            <textarea value={details.note} onChange={(event) => update("note", event.target.value)} rows={4} />
+            <textarea dir="rtl" value={details.note} onChange={(event) => update("note", event.target.value)} rows={4} />
           </div>
         </div>
 
         <div style={{ marginTop: 18 }}>
-          <button type="button" onClick={() => alert("Saving bank details to the database will be connected next.")}>Save Bank Details</button>
+          <button type="button" onClick={saveDetails} disabled={saving}>{saving ? "Saving..." : "Save Bank Details"}</button>
         </div>
+
+        {message && <p className="muted" style={{ marginTop: 14 }}>{message}</p>}
+      </section>
+
+      <section className="card" style={{ marginTop: 22 }}>
+        <h3 className="section-title">Database setup needed</h3>
+        <p className="muted">If saving does not work yet, create this table in Supabase:</p>
+        <pre style={{ whiteSpace: "pre-wrap", background: "#f8fafc", padding: 16, borderRadius: 12 }}>
+{`create table if not exists app_settings (
+  key text primary key,
+  value jsonb not null,
+  updated_at timestamptz default now()
+);`}
+        </pre>
       </section>
     </>
   );
