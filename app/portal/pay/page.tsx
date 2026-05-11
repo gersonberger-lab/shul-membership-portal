@@ -7,6 +7,15 @@ function formatMoney(amount: number) {
   return `£${amount.toFixed(2)}`;
 }
 
+const defaultBankDetails = {
+  accountName: "",
+  bankName: "",
+  sortCode: "",
+  accountNumber: "",
+  referenceText: "נא לציין את שמכם כאסמכתא לתשלום.",
+  note: "תשלומים בהעברה בנקאית יעודכנו בחשבון לאחר התאמה במשרד.",
+};
+
 export default function PortalPayPage() {
   const [loading, setLoading] = useState(true);
   const [member, setMember] = useState<any>(null);
@@ -15,6 +24,7 @@ export default function PortalPayPage() {
   const [amount, setAmount] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  const [bankDetails, setBankDetails] = useState(defaultBankDetails);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 760);
@@ -25,6 +35,16 @@ export default function PortalPayPage() {
 
   useEffect(() => {
     async function load() {
+      const { data: settingsData } = await supabase
+        .from("app_settings")
+        .select("value")
+        .eq("key", "bank_details")
+        .maybeSingle();
+
+      if (settingsData?.value) {
+        setBankDetails({ ...defaultBankDetails, ...(settingsData.value as any) });
+      }
+
       const { data: sessionData } = await supabase.auth.getSession();
       const userEmail = sessionData.session?.user?.email || null;
       setEmail(userEmail);
@@ -83,7 +103,7 @@ export default function PortalPayPage() {
       body: JSON.stringify({
         amount: paymentAmount,
         memberId: member?.id || "",
-        memberName: member ? `${member.english_first_name} ${member.english_surname}` : "Member",
+        memberName: member ? `${member.hebrew_first_name || ""} ${member.hebrew_surname || ""}`.trim() : "Member",
         memberEmail: email || "",
       }),
     });
@@ -183,8 +203,8 @@ export default function PortalPayPage() {
               {formatMoney(balance)}
             </strong>
             {member && (
-              <p style={{ color: "#64748b" }}>
-                Paying as {member.english_first_name} {member.english_surname}
+              <p style={{ color: "#64748b" }} dir="rtl">
+                משלם: {member.hebrew_first_name} {member.hebrew_surname}
               </p>
             )}
           </aside>
@@ -203,14 +223,14 @@ export default function PortalPayPage() {
             <h2 style={{ margin: 0, fontSize: 22 }}>Bank Transfer</h2>
             <p style={{ color: "#64748b" }}>Use these details if you prefer to pay by bank transfer.</p>
             <div style={{ display: "grid", gap: 8, marginTop: 14 }}>
-              <div><strong>Account name:</strong> To be added in Settings</div>
-              <div><strong>Bank:</strong> To be added in Settings</div>
-              <div><strong>Sort code:</strong> To be added</div>
-              <div><strong>Account number:</strong> To be added</div>
-              <div><strong>Reference:</strong> Please use your name as the payment reference.</div>
+              <div><strong>Account name:</strong> {bankDetails.accountName || "Not set"}</div>
+              <div><strong>Bank:</strong> {bankDetails.bankName || "Not set"}</div>
+              <div><strong>Sort code:</strong> {bankDetails.sortCode || "Not set"}</div>
+              <div><strong>Account number:</strong> {bankDetails.accountNumber || "Not set"}</div>
+              <div dir="rtl"><strong>אסמכתא:</strong> {bankDetails.referenceText}</div>
             </div>
-            <p style={{ color: "#64748b", marginTop: 14 }}>
-              Bank transfers will be matched to your account once received.
+            <p style={{ color: "#64748b", marginTop: 14 }} dir="rtl">
+              {bankDetails.note}
             </p>
           </div>
         </section>
