@@ -12,48 +12,23 @@ function hasHebrew(text: string) {
 }
 
 function description(entry: any) {
-  const category = Array.isArray(entry.charge_categories)
-    ? entry.charge_categories[0]
-    : entry.charge_categories;
-
-  const group = Array.isArray(category?.charge_category_groups)
-    ? category?.charge_category_groups[0]
-    : category?.charge_category_groups;
-
-  const fields = [
-    entry.description_he,
-    entry.hebrew_description,
-    entry.charge_description_he,
-    entry.charge_item_hebrew_name,
-    category?.name_he,
-    group?.name_he,
-    entry.description,
-  ];
-
+  const category = Array.isArray(entry.charge_categories) ? entry.charge_categories[0] : entry.charge_categories;
+  const group = Array.isArray(category?.charge_category_groups) ? category?.charge_category_groups[0] : category?.charge_category_groups;
   const hebrewParts = [group?.name_he, category?.name_he].filter(Boolean).join(" - ");
   if (hebrewParts) return hebrewParts;
 
+  const fields = [entry.description_he, entry.hebrew_description, entry.charge_description_he, entry.charge_item_hebrew_name, category?.name_he, group?.name_he, entry.description];
   for (const field of fields) {
     const value = String(field || "").trim();
     if (value && hasHebrew(value)) return value;
   }
-
   return String(entry.description || "").trim();
 }
 
-export default async function MemberAccountPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function MemberAccountPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: memberId } = await params;
 
-  const { data: member } = await supabase
-    .from("members")
-    .select("*")
-    .eq("id", memberId)
-    .single();
-
+  const { data: member } = await supabase.from("members").select("*").eq("id", memberId).single();
   const { data: ledgerEntries } = await supabase
     .from("ledger_entries")
     .select("*, charge_categories(name_he, charge_category_groups(name_he))")
@@ -76,7 +51,7 @@ export default async function MemberAccountPage({
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-start" }}>
             <a className="button secondary" href={`/members/${memberId}/edit`}>Edit Member</a>
-            <a className="button" href={`/charges/new?member=${memberId}`}>Add Charge</a>
+            <a className="button" href={`/charges/batch?member=${memberId}`}>Add Charge</a>
             <a className="button" href={`/payments/new?member=${memberId}`}>Add Payment</a>
           </div>
         </div>
@@ -120,13 +95,7 @@ export default async function MemberAccountPage({
         {!!ledgerEntries?.length && (
           <table className="table">
             <thead>
-              <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Charge</th>
-                <th>Payment</th>
-                <th>Actions</th>
-              </tr>
+              <tr><th>Date</th><th>Description</th><th>Charge</th><th>Payment</th><th>Actions</th></tr>
             </thead>
             <tbody>
               {ledgerEntries.map((entry) => {
