@@ -133,10 +133,7 @@ export default async function HomePage({
                   {month.invoiced ? formatMoney(month.invoiced) : "£0"}
                 </div>
                 <div className="invoice-chart-bar-wrap">
-                  <div
-                    className="invoice-chart-bar"
-                    style={{ height: `${height}px` }}
-                  />
+                  <div className="invoice-chart-bar" style={{ height: `${height}px` }} />
                 </div>
                 <div className="invoice-chart-label">{month.label}</div>
               </div>
@@ -151,7 +148,6 @@ export default async function HomePage({
           <div className="quick-links">
             <a href="/charges/batch">Batch Charges</a>
             <a href="/members">Open Members</a>
-            <a href="/charges/new">Single Charge</a>
             <a href="/payments/new">Add Payment</a>
             <a href="/settings/categories">Manage Categories</a>
           </div>
