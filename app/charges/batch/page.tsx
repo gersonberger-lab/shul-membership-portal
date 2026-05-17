@@ -6,8 +6,6 @@ import { supabase } from "../../../lib/supabase";
 
 type Member = {
   id: string;
-  english_first_name: string;
-  english_surname: string;
   hebrew_first_name: string | null;
   hebrew_surname: string | null;
   email: string | null;
@@ -15,13 +13,11 @@ type Member = {
 
 type ChargeItem = {
   id: string;
-  name_en: string;
   name_he: string | null;
   search_terms: string | null;
   default_amount: number | null;
   due_days: number;
   charge_category_groups: {
-    name_en: string;
     name_he: string | null;
   }[] | null;
 };
@@ -41,17 +37,18 @@ function addDays(dateString: string, days: number) {
 }
 
 function memberName(member: Member) {
-  return `${member.english_first_name} ${member.english_surname}`.trim();
+  return `${member.hebrew_first_name || ""} ${member.hebrew_surname || ""}`.trim() || member.email || "-";
 }
 
 function chargeName(item: ChargeItem) {
-  const group = item.charge_category_groups?.[0]?.name_en?.trim();
-  return group ? `${group} ${item.name_en}` : item.name_en;
+  const group = item.charge_category_groups?.[0]?.name_he?.trim();
+  const name = item.name_he?.trim() || "";
+  return group ? `${group} - ${name}` : name;
 }
 
 function rowDescription(row: ChargeRow) {
   const extra = row.descriptionExtra.trim();
-  return extra ? `${row.chargeName} — ${extra}` : row.chargeName;
+  return extra ? `${row.chargeName} - ${extra}` : row.chargeName;
 }
 
 function blankRow(): ChargeRow {
@@ -83,12 +80,12 @@ export default function BatchChargePage() {
     async function loadData() {
       const { data: memberData } = await supabase
         .from("members")
-        .select("id, english_first_name, english_surname, hebrew_first_name, hebrew_surname, email")
-        .order("english_surname");
+        .select("id, hebrew_first_name, hebrew_surname, email")
+        .order("hebrew_surname");
 
       const { data: chargeData } = await supabase
         .from("charge_categories")
-        .select("id, name_en, name_he, search_terms, default_amount, due_days, charge_category_groups(name_en, name_he)")
+        .select("id, name_he, search_terms, default_amount, due_days, charge_category_groups(name_he)")
         .eq("active", true)
         .order("sort_order");
 
@@ -100,26 +97,16 @@ export default function BatchChargePage() {
   }, []);
 
   const filteredMembers = useMemo(() => {
-    const q = memberSearch.trim().toLowerCase();
-
+    const q = memberSearch.trim();
     return members
-      .filter((member) => {
-        const english = memberName(member).toLowerCase();
-        const hebrew = `${member.hebrew_first_name || ""} ${member.hebrew_surname || ""}`;
-        return !q || english.includes(q) || hebrew.includes(memberSearch.trim()) || (member.email || "").toLowerCase().includes(q);
-      })
+      .filter((member) => !q || memberName(member).includes(q) || (member.email || "").toLowerCase().includes(q.toLowerCase()))
       .slice(0, 10);
   }, [members, memberSearch]);
 
   const filteredChargeItems = useMemo(() => {
-    const q = chargeSearch.trim().toLowerCase();
-
+    const q = chargeSearch.trim();
     return chargeItems
-      .filter((item) => {
-        const english = chargeName(item).toLowerCase();
-        const hebrew = `${item.charge_category_groups?.[0]?.name_he || ""} ${item.name_he || ""}`;
-        return !q || english.includes(q) || hebrew.includes(chargeSearch.trim()) || (item.search_terms || "").toLowerCase().includes(q);
-      })
+      .filter((item) => !q || chargeName(item).includes(q) || (item.search_terms || "").includes(q))
       .slice(0, 10);
   }, [chargeItems, chargeSearch]);
 
@@ -148,17 +135,7 @@ export default function BatchChargePage() {
   };
 
   const addRow = () => setRows((current) => [...current, blankRow()]);
-
-  const removeRow = (rowId: string) => {
-    setRows((current) => current.length <= 1 ? current : current.filter((row) => row.tempId !== rowId));
-  };
-
-  const handleAmountKeyDown = (event: React.KeyboardEvent<HTMLInputElement>, index: number) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      if (index === rows.length - 1) addRow();
-    }
-  };
+  const removeRow = (rowId: string) => setRows((current) => current.length <= 1 ? current : current.filter((row) => row.tempId !== rowId));
 
   const postCharges = async () => {
     if (!memberId || !entryDate || !validRows.length) {
@@ -176,6 +153,7 @@ export default function BatchChargePage() {
         entry_type: "charge",
         charge_category_id: row.charge_category_id,
         description: rowDescription(row),
+        description_he: rowDescription(row),
         debit_amount: Number(row.amount),
         credit_amount: 0,
         due_date: item ? addDays(entryDate, item.due_days || 0) : null,
@@ -199,8 +177,8 @@ export default function BatchChargePage() {
     <>
       <section className="hero compact-hero">
         <span className="eyebrow">Fast Entry</span>
-        <h1>Batch Charges</h1>
-        <p>Add several charges to one member quickly.</p>
+        <h1>Add Charge</h1>
+        <p>Add one or more Hebrew charges to a member quickly.</p>
       </section>
 
       <section className="card batch-entry-card">
@@ -209,7 +187,8 @@ export default function BatchChargePage() {
             <label>Member</label>
             <input
               value={memberSearch}
-              placeholder="Search member"
+              dir="rtl"
+              placeholder="Search Hebrew member name"
               onFocus={() => setMemberOpen(true)}
               onChange={(event) => {
                 setMemberSearch(event.target.value);
@@ -222,8 +201,8 @@ export default function BatchChargePage() {
               <div className="search-results">
                 {filteredMembers.map((member) => (
                   <button key={member.id} type="button" className="search-result" onMouseDown={() => selectMember(member)}>
-                    <strong>{memberName(member)}</strong>
-                    <span dir="rtl">{member.hebrew_first_name} {member.hebrew_surname}</span>
+                    <strong dir="rtl">{memberName(member)}</strong>
+                    <span>{member.email || ""}</span>
                   </button>
                 ))}
               </div>
@@ -243,10 +222,7 @@ export default function BatchChargePage() {
 
         {selectedMember && (
           <div className="batch-selected-member">
-            Posting to <strong>{memberName(selectedMember)}</strong>
-            {selectedMember.hebrew_first_name || selectedMember.hebrew_surname ? (
-              <span dir="rtl">{selectedMember.hebrew_first_name} {selectedMember.hebrew_surname}</span>
-            ) : null}
+            Posting to <strong dir="rtl">{memberName(selectedMember)}</strong>
           </div>
         )}
 
@@ -255,7 +231,7 @@ export default function BatchChargePage() {
             <div>#</div>
             <div>Charge</div>
             <div>Amount</div>
-            <div>Description</div>
+            <div>Hebrew description</div>
             <div></div>
           </div>
 
@@ -266,7 +242,8 @@ export default function BatchChargePage() {
               <div style={{ position: "relative" }}>
                 <input
                   value={row.chargeName}
-                  placeholder="Type charge"
+                  dir="rtl"
+                  placeholder="Type Hebrew charge"
                   onFocus={() => {
                     setActiveChargeRow(row.tempId);
                     setChargeSearch(row.chargeName);
@@ -282,7 +259,7 @@ export default function BatchChargePage() {
                   <div className="search-results">
                     {filteredChargeItems.map((item) => (
                       <button key={item.id} type="button" className="search-result" onMouseDown={() => selectCharge(row.tempId, item)}>
-                        <strong>{chargeName(item)}</strong>
+                        <strong dir="rtl">{chargeName(item)}</strong>
                         <span>{item.default_amount ? `£${item.default_amount}` : "No default"}</span>
                       </button>
                     ))}
@@ -298,12 +275,12 @@ export default function BatchChargePage() {
                 placeholder="0.00"
                 value={row.amount}
                 onChange={(event) => updateRow(row.tempId, { amount: event.target.value })}
-                onKeyDown={(event) => handleAmountKeyDown(event, index)}
               />
 
               <input
                 value={row.descriptionExtra}
-                placeholder="Optional description"
+                dir="rtl"
+                placeholder="Optional Hebrew description"
                 onChange={(event) => updateRow(row.tempId, { descriptionExtra: event.target.value })}
               />
 
