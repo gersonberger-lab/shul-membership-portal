@@ -54,11 +54,14 @@ export default function HebrewInput({ name, value = "", placeholder, required, r
     placeholder,
     required,
     dir: "rtl" as const,
-    lang: "he",
+    lang: "he-IL",
     autoComplete: "off",
+    autoCorrect: "off",
+    autoCapitalize: "none",
+    spellCheck: false,
     inputMode: "text" as const,
     onFocus: () => setFocused(true),
-    onBlur: () => setTimeout(() => setFocused(false), 150),
+    onBlur: () => setTimeout(() => setFocused(false), 180),
     onChange,
   };
 
@@ -66,17 +69,18 @@ export default function HebrewInput({ name, value = "", placeholder, required, r
     <div>
       {rows ? <textarea {...sharedProps} rows={rows} /> : <input {...sharedProps} />}
 
-      {!isMobile && focused && (
+      {focused && (
         <div
           onMouseDown={(event) => event.preventDefault()}
           style={{
             marginTop: 8,
-            padding: 10,
+            padding: isMobile ? 8 : 10,
             border: "1px solid #d9e4ec",
             borderRadius: 12,
             background: "#f8fafc",
             display: "grid",
             gap: 7,
+            direction: "rtl",
           }}
         >
           {letters.map((row, index) => (
@@ -88,12 +92,12 @@ export default function HebrewInput({ name, value = "", placeholder, required, r
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => addLetter(letter)}
                   style={{
-                    minWidth: 34,
-                    height: 34,
+                    minWidth: isMobile ? 38 : 34,
+                    height: isMobile ? 38 : 34,
                     borderRadius: 9,
                     border: "1px solid #cbd5e1",
                     background: "white",
-                    fontSize: 18,
+                    fontSize: isMobile ? 20 : 18,
                     fontWeight: 700,
                     cursor: "pointer",
                   }}
